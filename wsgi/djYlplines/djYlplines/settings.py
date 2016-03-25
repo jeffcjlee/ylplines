@@ -25,7 +25,7 @@ ON_OPENSHIFT = False
 if 'OPENSHIFT_REPO_DIR' in os.environ:
     ON_OPENSHIFT = True
     print("ON_OPENSHIFT IS ON")
-    print("REPO_DIR: " + os.environ['OPENSHIFT_REPO_DIR'])
+    print("REPO_DIR!!: " + os.environ['OPENSHIFT_REPO_DIR'])
     print("USERNAME: " + os.environ['OPENSHIFT_POSTGRESQL_DB_USERNAME'])
     
 
