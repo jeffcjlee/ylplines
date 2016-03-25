@@ -24,7 +24,10 @@ SECRETS = secrets.getter(os.path.join(DATA_DIR, 'secrets.json'))
 ON_OPENSHIFT = False
 if 'OPENSHIFT_REPO_DIR' in os.environ:
     ON_OPENSHIFT = True
+    print("ON_OPENSHIFT IS ON")
+    print("USERNAME: " + os.environ['OPENSHIFT_POSTGRESQL_DB_USERNAME'])
     
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
