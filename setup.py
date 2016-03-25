@@ -10,7 +10,8 @@ setup(
     author_email='jeffcjlee@gmail.com',
     url='jeffcjlee.com',
     install_requires=[
-        'Django==1.8.4'
+        'Django==1.8.4',
+        'psycopg2'
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'

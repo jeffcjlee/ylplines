@@ -23,11 +23,7 @@ SECRETS = secrets.getter(os.path.join(DATA_DIR, 'secrets.json'))
 
 ON_OPENSHIFT = False
 if 'OPENSHIFT_REPO_DIR' in os.environ:
-    ON_OPENSHIFT = True
-    print("ON_OPENSHIFT IS ON")
-    print("REPO_DIR!!: " + os.environ['OPENSHIFT_REPO_DIR'])
-    print("USERNAME: " + os.environ['OPENSHIFT_POSTGRESQL_DB_USERNAME'])
-    
+    ON_OPENSHIFT = True   
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -36,7 +32,8 @@ if 'OPENSHIFT_REPO_DIR' in os.environ:
 SECRET_KEY = SECRETS['secret_key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG') == 'True'
+# Commented out since debug flag is now handled down in database section
+# DEBUG = os.environ.get('DEBUG') == 'True' 
 
 from socket import gethostname
 ALLOWED_HOSTS = [
@@ -56,6 +53,7 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'main',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -70,21 +68,40 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'djYlplines.urls'
 
-TEMPLATES = [
-    {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-            ],
+if ON_OPENSHIFT:
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+            'TEMPLATE_DEBUG': True,  # Set this to False when in production!
         },
-    },
-]
+    ]
+else:
+    TEMPLATES = [
+        {
+            'BACKEND': 'django.template.backends.django.DjangoTemplates',
+            'DIRS': [],
+            'APP_DIRS': True,
+            'OPTIONS': {
+                'context_processors': [
+                    'django.template.context_processors.debug',
+                    'django.template.context_processors.request',
+                    'django.contrib.auth.context_processors.auth',
+                    'django.contrib.messages.context_processors.messages',
+                ],
+            },
+            'TEMPLATE_DEBUG': True,
+        },
+    ]
 
 WSGI_APPLICATION = 'djYlplines.wsgi.application'
 
@@ -94,7 +111,6 @@ WSGI_APPLICATION = 'djYlplines.wsgi.application'
 
 if ON_OPENSHIFT:
     DEBUG = True
-    TEMPLATE_DEBUG = True #Set this to False when in production!
     ALLOWED_HOSTS = ['*']
     DATABASES = {
         'default': {
@@ -108,7 +124,6 @@ if ON_OPENSHIFT:
     }
 else:
     DEBUG = True
-    TEMPLATE_DEBUG = True
     ALLOWED_HOSTS = []
     DATABASES = {
         'default': {
