@@ -90,7 +90,7 @@ WSGI_APPLICATION = 'djYlplines.wsgi.application'
 
 if ON_OPENSHIFT:
     DEBUG = True
-    TEMPLATE_DEBUG = False
+    TEMPLATE_DEBUG = True #Set this to False when in production!
     ALLOWED_HOSTS = ['*']
     DATABASES = {
         'default': {
