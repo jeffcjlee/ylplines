@@ -16,7 +16,9 @@ setup(
         'lxml==3.4.4',
         'beautifulsoup4',
         'requests',
-        'grequests'
+        'grequests',
+        'coverage',
+        'coveralls'
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
