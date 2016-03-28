@@ -23,7 +23,11 @@ SECRETS = secrets.getter(os.path.join(DATA_DIR, 'secrets.json'))
 
 ON_OPENSHIFT = False
 if 'OPENSHIFT_REPO_DIR' in os.environ:
-    ON_OPENSHIFT = True   
+    ON_OPENSHIFT = True
+
+ON_TRAVIS = False
+if 'TRAVIS' in os.environ:
+    ON_TRAVIS = True
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
@@ -120,6 +124,19 @@ if ON_OPENSHIFT:
             'PASSWORD': os.environ['OPENSHIFT_POSTGRESQL_DB_PASSWORD'],
             'HOST': os.environ['OPENSHIFT_POSTGRESQL_DB_HOST'],
             'PORT': os.environ['OPENSHIFT_POSTGRESQL_DB_PORT'],
+        }
+    }
+elif ON_TRAVIS:
+    DEBUG = True
+    ALLOWED_HOSTS = ['*']
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
+            'NAME': 'travis_ci_test',
+            'USER': 'postgres',
+            'PASSWORD': '',
+            'HOST': 'localhost',
+            'PORT': '5432',
         }
     }
 else:
