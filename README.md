@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/jcjl013/ylplines.png?label=ready&title=Ready)](https://waffle.io/jcjl013/ylplines)
 Django on OpenShift
 ===================
 
