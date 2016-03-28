@@ -1,0 +1,19 @@
+language: python
+services:
+- postgresql: "9.2"
+python:
+- "3.3"
+env:
+- DJANGO=1.8.4 DB=postgres
+install:
+- python setup.py -q install
+before_script:
+- psql -c 'create database travis_ci_test;' -U postgres
+script:
+- python manage.py test
+notifications:
+  email:
+    recipients:
+      - jeffcjlee@gmail.com
+    on_success: always
+    on_failure: always
