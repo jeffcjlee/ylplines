@@ -1,10 +1,10 @@
 language: python
 python:
-- "3.3"
+- '3.3'
 services:
 - postgresql
 addons:
-  postgresql: "9.2"
+  postgresql: '9.2'
 env:
 - DJANGO=1.8.4 DB=postgres
 install:
@@ -16,6 +16,15 @@ script:
 notifications:
   email:
     recipients:
-      - jeffcjlee@gmail.com
+    - jeffcjlee@gmail.com
     on_success: never
     on_failure: never
+deploy:
+  provider: openshift
+  user: jeffcjlee@gmail.com
+  password:
+    secure: R55t4IVsAA7pMpGfVOxj4tUx8/GvUNIfaL1h0hjMSWA/jcrt0uLKraEl1zDqEhBwBJlxbFmvfwwtnmuPiBOnh3tIn6oA7robebV0gjIBIEXdqw2hHa8DW+FzKXfMBpHgAFrnhPvYljIOxFJCQBK5BAsDlpcku/Q5QwFM4RTpqutQnqLYm7drp12HXu7oHLfBkARFkUCplPldQQniAIMh2OWgFHQhRzWhmX7HE6PKcMM4UZj2XS84g9Nn+XI7ibEBuDaMEhQf3y2e7nH0ivMmOn1ZSninNPxBn1YAfXMFRaD5raGK4EH7P3jA0YoR5vuS9aTSh//dxMhLv50ctAXVTczgnWXJlKs0Fx7ICJF0bMIs0XwW1UoZramUXaSOHqg92sRyMmnzCqP6PZHR+POuXDJ3VukXFYjVUigm9W5jTuV0xuikr2919kjSAMGAwl1JMuLPeMCPzJ2NCAxgX5Vm79wwCayey1Hwm1S27gNaExEBE9KUn5W83+r04ea8M5kMYyxKC2gHRnEr6lITx9b7TvMJd7ztEFP7CaSXg8Hd1R1D0oF4CrLWMU9/yfiuEk7sCLirVPLlVDocigAUX2cATvPQ5b962mgL9VzGQCFcQJXH1FcDGZ86IAR++YzLYGDAv5U4xb7B0fOgaAL+cjW67d3MEgNKJ5KyIJ54926cTkI=
+  app: ylplines
+  domain: ylplines-jeffcjlee.rhcloud.com
+  on:
+    repo: jcjl013/ylplines
