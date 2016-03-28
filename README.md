@@ -1,4 +1,5 @@
 ![Alt text](https://travis-ci.org/jcjl013/ylplines.svg?branch=master "Travis CI Status")
+[![Stories in Ready](https://badge.waffle.io/jcjl013/ylplines.png?label=ready&title=Ready)](https://waffle.io/jcjl013/ylplines)
 
 Django on OpenShift
 ===================
