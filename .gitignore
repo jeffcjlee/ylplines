@@ -7,4 +7,5 @@
 .pydevproject
 /wsgi/djYlplines/yelp_content.txt
 /wsgi/privatekeys
+/.idea
 /wsgi/djYlplines/yelp_content_pretty.txt
