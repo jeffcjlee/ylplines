@@ -5,3 +5,6 @@
 *~
 .project
 .pydevproject
+/wsgi/djYlplines/yelp_content.txt
+/wsgi/privatekeys
+/wsgi/djYlplines/yelp_content_pretty.txt
