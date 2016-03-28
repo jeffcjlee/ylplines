@@ -13,7 +13,7 @@ setup(
         'Django==1.8.4',
         'psycopg2',
         'yelp',
-        'lxml',
+        'lxml==3.4.4',
         'beautifulsoup4',
         'requests',
         'grequests'
