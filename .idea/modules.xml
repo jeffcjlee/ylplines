@@ -1,9 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<project version="4">
-  <component name="ProjectModuleManager">
-    <modules>
-      <module fileurl="file://$USER_HOME$/mydjango/.idea/mydjango.iml" filepath="$USER_HOME$/mydjango/.idea/mydjango.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/ylplines.iml" filepath="$PROJECT_DIR$/.idea/ylplines.iml" />
-    </modules>
-  </component>
-</project>
