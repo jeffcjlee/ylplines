@@ -1,8 +1,10 @@
 language: python
-services:
-- postgresql: "9.2"
 python:
 - "3.3"
+services:
+- postgresql
+addons:
+  postgresql: "9.2"
 env:
 - DJANGO=1.8.4 DB=postgres
 install:
