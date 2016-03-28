@@ -81,8 +81,8 @@ if ON_OPENSHIFT:
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                 ],
+                'debug': True #TODO: Set this to False when in production!
             },
-            'TEMPLATE_DEBUG': True,  # Set this to False when in production!
         },
     ]
 else:
@@ -98,8 +98,8 @@ else:
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                 ],
+                'debug': True
             },
-            'TEMPLATE_DEBUG': True,
         },
     ]
 
