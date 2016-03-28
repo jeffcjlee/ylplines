@@ -1,12 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2dd5adbf-8852-4280-bf9a-cbca911b5736" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/README.md" afterPath="$PROJECT_DIR$/README.md" />
-    </list>
+    <list default="true" id="2dd5adbf-8852-4280-bf9a-cbca911b5736" name="Default" comment="" />
     <list id="9b542331-81d3-4f71-9343-49e9a74c1200" name="Ignore" comment="Changes that are missing PyCharm ignore belong here.">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/ylplines.iml" afterPath="$PROJECT_DIR$/.idea/ylplines.iml" />
     </list>
     <ignored path="ylplines.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -838,7 +835,21 @@
       <option name="project" value="LOCAL" />
       <updated>1459150566278</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="Merge branch 'master' of https://github.com/waffle-iron/ylplines into waffle-iron-master&#10;&#10;# Conflicts:&#10;#&#9;README.md&#10;">
+      <created>1459150862381</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1459150862381</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Merge branch 'master' of https://github.com/waffle-iron/ylplines into waffle-iron-master&#10;&#10;# Conflicts:&#10;#&#9;README.md&#10;">
+      <created>1459150896470</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1459150896470</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TestHistory">
@@ -856,7 +867,7 @@
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32909605" sideWeight="0.51175547" order="11" side_tool="true" content_ui="tabs" />
       <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32836992" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32909605" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32909605" sideWeight="0.4882445" order="8" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32909605" sideWeight="0.4882445" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.32909605" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
@@ -926,7 +937,8 @@
     <MESSAGE value="Implement Travis CI" />
     <MESSAGE value="Testing" />
     <MESSAGE value="Add Travis CI status badge" />
-    <option name="LAST_COMMIT_MESSAGE" value="Add Travis CI status badge" />
+    <MESSAGE value="Merge branch 'master' of https://github.com/waffle-iron/ylplines into waffle-iron-master&#10;&#10;# Conflicts:&#10;#&#9;README.md&#10;" />
+    <option name="LAST_COMMIT_MESSAGE" value="Merge branch 'master' of https://github.com/waffle-iron/ylplines into waffle-iron-master&#10;&#10;# Conflicts:&#10;#&#9;README.md&#10;" />
     <option name="PRESELECT_EXISTING_CHANGELIST" value="false" />
   </component>
   <component name="XDebuggerManager">
