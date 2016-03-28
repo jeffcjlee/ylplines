@@ -1,4 +1,4 @@
-This is a test!x2
+![Alt text](https://travis-ci.org/jcjl013/ylplines.svg?branch=master "Travis CI Status")
 
 Django on OpenShift
 ===================
