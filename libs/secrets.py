@@ -4,12 +4,14 @@ __secrets = {
     'secret_key': 'a',
 }
 
+
 def getter(path):
     try:
         with open(path) as handle:
             return json.load(handle)
     except IOError:
         return __secrets
+
 
 def generator():
 
