@@ -9,3 +9,4 @@
 /wsgi/privatekeys
 /.idea
 /wsgi/djYlplines/yelp_content_pretty.txt
+/wsgi/djYlplines/main/migrations
