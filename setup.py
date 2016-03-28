@@ -11,7 +11,12 @@ setup(
     url='jeffcjlee.com',
     install_requires=[
         'Django==1.8.4',
-        'psycopg2'
+        'psycopg2',
+        'yelp',
+        'lxml',
+        'beautifulsoup4',
+        'requests',
+        'grequests'
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
