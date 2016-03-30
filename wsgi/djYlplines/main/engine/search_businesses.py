@@ -18,6 +18,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 import io
 import json
 import os
+import sys
 
 import grequests
 
@@ -113,6 +114,7 @@ def run_query(query):
     params = {
         'term': query,
     }
+    sys.setrecursionlimit(5000)
     print("before search")
     search = Search(client)
     response = search.search(location, **params)
