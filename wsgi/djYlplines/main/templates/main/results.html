@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
+{% extends 'base.html' %}
+{% load staticfiles %}
 
-</body>
-</html>
+{% block title %}Search Results{% endblock %}
+
+{% block body %}
+{% if businesses %}
+    <ul>
+    {% for business in businesses %}
+        <li><a href="{% url 'main:business' business.id %}">{{ business.name }}</a></li>
+    {% endfor %}
+    </ul>
+{% endif %}
+{% endblock %}

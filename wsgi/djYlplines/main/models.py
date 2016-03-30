@@ -23,7 +23,7 @@ from django.db import models
 class Business(models.Model):
     id = models.CharField(max_length=200, primary_key=True, unique=True)
     name = models.CharField(max_length=200)
-    image_url = models.URLField(max_length=500)
+    image_url = models.URLField(max_length=500, null=True, blank=True)
     url = models.URLField(max_length=500)
     review_count = models.PositiveIntegerField()
     rating = models.DecimalField(max_digits=2, decimal_places=1)

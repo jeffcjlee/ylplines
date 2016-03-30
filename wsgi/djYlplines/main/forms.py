@@ -19,4 +19,4 @@ from django import forms
 
 
 class FrontSearchForm(forms.Form):
-    search_string = forms.CharField(label='Enter search terms', max_length=200)
+    query = forms.CharField(label='Enter search terms', max_length=200)

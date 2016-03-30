@@ -19,7 +19,7 @@ import io
 import json
 import grequests
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from os import path
 from bs4 import BeautifulSoup
 from bs4 import SoupStrainer
@@ -76,14 +76,10 @@ def save_business(id, name, image_url, url, review_count, rating):
     business.save()
 
 
-def search_for_businesses(search_str=""):
+def search_for_businesses(query=""):
     """Search for businesses that match the search string and return a list of businesses"""
-    if search_str == "":
-        search_str = 'San Francisco'
-
-    client = get_yelp_api_client()
-    response = client.search(search_str)
-    businesses = response.businesses
+    print("Enter search_for_businesses")
+    businesses = run_query(query)
 
     for cur_business in businesses:
         save_business(cur_business.id,
@@ -93,6 +89,22 @@ def search_for_businesses(search_str=""):
                       cur_business.review_count,
                       cur_business.rating)
 
+    return businesses
+
+
+def run_query(query):
+
+    location = 'San Francisco'
+
+    client = get_yelp_api_client()
+    params = {
+        'term': query,
+    }
+    print("before search")
+    response = client.search(location, **params)
+    print("after search")
+    businesses = response.businesses
+    return businesses
 
 #########################################################
 #########################################################
@@ -120,6 +132,9 @@ def get_business_reviews(business, debug=False):
     latest_review_date = None
     todays_date = datetime.today().date()
 
+    if business.latest_review_pull and business.latest_review_pull + timedelta(days=7) >= todays_date:
+        return
+
     if Review.objects.filter(business_id=business.id).exists():
         latest_review_date = Review.objects.filter(business_id=business.id).latest('publish_date').publish_date
 
@@ -136,7 +151,11 @@ def get_business_reviews(business, debug=False):
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
     for ctr, response in enumerate(responses):
         print("%s..." % ctr, end="", flush=True)
-        process_async_response(response, business, latest_review_date)
+        if response:
+            if response.status_code == 200:
+                process_async_response(response, business, latest_review_date)
+            else:
+                print("Retrieval unsuccessful, got a status code of: " + str(response.status_code))
 
     business.latest_review_pull = todays_date
     business.save()

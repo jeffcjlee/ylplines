@@ -1,3 +1,7 @@
 body {
     color: #FF0000;
 }
+
+svg > text {
+    display: none;
+}

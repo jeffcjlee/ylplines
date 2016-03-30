@@ -11,6 +11,6 @@ from . import views
 
 urlpatterns = [
     url(r'^/?$', views.index, name='index'),
-    url(r'^results$', views.search_businesses, name='search_businesses'),
-    url(r'^business$', views.business, name='results'),
+    url(r'^results$', views.search_businesses, name='results'),
+    url(r'^business/(?P<business_id>.+)/$', views.business, name='business'),
 ]
