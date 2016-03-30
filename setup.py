@@ -12,6 +12,7 @@ setup(
     install_requires=[
         'Django==1.8.4',
         'psycopg2',
+        'six',
         'yelp',
         'lxml==3.4.4',
         'beautifulsoup4',
