@@ -20,12 +20,12 @@ import json
 import os
 import sys
 
-#import grequests
-
 from datetime import datetime, timedelta
+from timeit import default_timer
 from os import path
 from bs4 import BeautifulSoup
 from bs4 import SoupStrainer
+from requests_futures.sessions import FuturesSession
 from yelp.client import Client
 from yelp.endpoint.search import Search
 from yelp.oauth1_authenticator import Oauth1Authenticator
@@ -129,15 +129,6 @@ def get_num_reviews_for_business(business, debug=False):
         business = Business.objects.get(id='tadu-ethiopian-kitchen-san-francisco-3')
 
     return business.review_count
-    # urls = [business.url]
-    # gre_request = (grequests.get(url) for url in urls)
-    # response = grequests.map(gre_request)[0]
-    # content = response.content
-    # strainer = SoupStrainer(class_='tab-link tab-link--nav is-selected')
-    # soup = BeautifulSoup(content, 'lxml', parse_only=strainer)
-    # num_of_reviews = soup.find('span', class_='tab-link_count').get_text()
-    # num_of_reviews = int(num_of_reviews[1:len(num_of_reviews)-1])
-    # return num_of_reviews
 
 
 def get_business_reviews(business, debug=False):
@@ -157,24 +148,41 @@ def get_business_reviews(business, debug=False):
     num_requests = num_reviews // NUM_REVIEWS_PER_PAGE
     if num_reviews % NUM_REVIEWS_PER_PAGE != 1:
         num_requests += 1
-    print("Async pull start")
+    print("Concurrent pull start")
+    concurrency_pull_start = default_timer()
     urls = create_urls_list(business.url, num_reviews)
-    #gre_request = (grequests.get(url) for url in urls)
-    #responses = grequests.map(gre_request)
-    responses = None
-    print("Async pull end")
+    MAX_WORKERS = max(urls.__len__()//3, 20)
+    session = FuturesSession(max_workers=MAX_WORKERS)
+    futures = []
+    responses = []
+    for url in urls:
+        future = session.get(url)
+        futures.append(future)
 
+    for i, future in enumerate(futures, 1):
+        response = future.result()
+        responses.append(response)
+        #print('response %s status: %s' % (i, str(response.status_code)))
+
+    concurrency_pull_end = default_timer()
+    print("Concurrent pull end.")
+    print('Concurrency pull duration: %s seconds' % str(concurrency_pull_end-concurrency_pull_start))
+
+    print('Begin response processing')
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
-    for ctr, response in enumerate(responses):
+    process_start = default_timer()
+    for ctr, response in enumerate(responses, 1):
         print("%s..." % ctr, end="", flush=True)
         if response:
             if response.status_code == 200:
                 process_async_response(response, business, latest_review_date)
             else:
                 print("Retrieval unsuccessful, got a status code of: " + str(response.status_code))
-
+    process_end = default_timer()
+    print('\nResponse processing duration: %s seconds' % str(process_end-process_start))
     business.latest_review_pull = todays_date
     business.save()
+
 
 
 def create_urls_list(business_url, num_reviews):

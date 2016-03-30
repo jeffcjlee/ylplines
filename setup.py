@@ -4,7 +4,7 @@ from setuptools import setup
 
 setup(
     name='ylplines',
-    version='1.0',
+    version='0.0.1',
     description='Yelp trends',
     author='Jeff Lee',
     author_email='jeffcjlee@gmail.com',
@@ -12,15 +12,13 @@ setup(
     install_requires=[
         'Django==1.8.4',
         'psycopg2>=2.6.1',
-        'six>=1.4',
         'yelp',
         'lxml==3.4.4',
         'beautifulsoup4',
         'requests',
-        'grequests',
+        'requests-futures',
         'coverage>=4.1b2',
         'coveralls',
-        'setuptools>=18.1',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'

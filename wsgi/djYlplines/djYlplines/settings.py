@@ -85,7 +85,7 @@ if ON_OPENSHIFT:
                     'django.contrib.auth.context_processors.auth',
                     'django.contrib.messages.context_processors.messages',
                 ],
-                'debug': True #TODO: Set this to False when in production!
+                'debug': False # Controls if debug shows up in production. KEEP FALSE.
             },
         },
     ]
