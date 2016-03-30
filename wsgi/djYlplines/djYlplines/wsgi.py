@@ -7,7 +7,7 @@ For more information on this file, see
 https://docs.djangoproject.com/en/1.8/howto/deployment/wsgi/
 """
 from gevent import monkey
-monkey.patch_all()
+#monkey.patch_all()
 
 import os
 
