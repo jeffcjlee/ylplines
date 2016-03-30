@@ -15,15 +15,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
-from gevent import monkey
-monkey.patch_all()
-
 import io
 import json
 import os
 import sys
 
-import grequests
+#import grequests
 
 from datetime import datetime, timedelta
 from os import path
@@ -117,7 +114,6 @@ def run_query(query):
     params = {
         'term': query,
     }
-    sys.setrecursionlimit(5000)
     print("before search")
     search = Search(client)
     response = search.search(location, **params)
@@ -163,8 +159,9 @@ def get_business_reviews(business, debug=False):
         num_requests += 1
     print("Async pull start")
     urls = create_urls_list(business.url, num_reviews)
-    gre_request = (grequests.get(url) for url in urls)
-    responses = grequests.map(gre_request)
+    #gre_request = (grequests.get(url) for url in urls)
+    #responses = grequests.map(gre_request)
+    responses = None
     print("Async pull end")
 
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
