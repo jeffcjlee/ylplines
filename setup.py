@@ -11,14 +11,14 @@ setup(
     url='jeffcjlee.com',
     install_requires=[
         'Django==1.8.4',
-        'psycopg2',
+        'psycopg2>=2.6.1',
         'six>=1.4',
         'yelp',
         'lxml==3.4.4',
         'beautifulsoup4',
         'requests',
         'grequests',
-        'coverage',
+        'coverage>=4.1b2',
         'coveralls'
     ],
     dependency_links=[
