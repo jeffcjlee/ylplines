@@ -15,7 +15,6 @@ setup(
         'yelp',
         'lxml==3.4.4',
         'beautifulsoup4',
-        'requests',
         'requests-futures>=0.9.7',
         'coverage>=4.1b2',
         'coveralls',
