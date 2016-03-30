@@ -11,11 +11,13 @@ $(function() {
             {
                 'name': 'ylpline rating',
                 'type': 'spline',
+                'color': '#0000FF',
                 'data': ylpline_ratings,
             },
             {
                 'name': 'review rating',
                 'type': 'scatter',
+                'color': 'rgba(10,200,90,0.15)',
                 'data': review_ratings,
             }
         ],

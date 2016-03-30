@@ -26,7 +26,7 @@ def get_review_graph_data(business, debug=False):
         business = Business.objects.filter(id='blue-bottle-coffee-san-francisco-8')
     print(str(business))
     reviews = Review.objects.filter(business=business).order_by('publish_date')
-    SMOOTH_FACTOR = 0.25
+    SMOOTH_FACTOR = 0.2
 
     ylpline_ratings = []
     review_ratings = []
@@ -64,5 +64,5 @@ def get_review_graph_data(business, debug=False):
 
     #print(str(ylpline_ratings))
     #print(str(sorted(g_data.items())))
-    return (ylpline_ratings, review_ratings)
+    return (ylpline_ratings, review_ratings, smooth_rating)
 

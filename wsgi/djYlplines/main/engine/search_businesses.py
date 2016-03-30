@@ -90,10 +90,10 @@ def save_business(id, name, image_url, url, review_count, rating):
     business.save()
 
 
-def search_for_businesses(query=""):
+def search_for_businesses(query="", location=""):
     """Search for businesses that match the search string and return a list of businesses"""
     print("Enter search_for_businesses")
-    businesses = run_query(query)
+    businesses = run_query(query, location)
 
     for cur_business in businesses:
         save_business(cur_business.id,
@@ -106,9 +106,9 @@ def search_for_businesses(query=""):
     return businesses
 
 
-def run_query(query):
+def run_query(query, location):
 
-    location = 'San Francisco'
+    #location = 'San Francisco'
 
     client = get_yelp_api_client()
     params = {

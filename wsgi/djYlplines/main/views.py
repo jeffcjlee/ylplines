@@ -46,7 +46,8 @@ def index(request):
         if form.is_valid():
             print("form found valid")
             query = form.cleaned_data['query']
-            businesses = search_for_businesses(query)
+            location = form.cleaned_data['location']
+            businesses = search_for_businesses(query, location)
             context = {'businesses': businesses}
             return render(request, 'main/results.html', context)
         else:
@@ -65,12 +66,13 @@ def business(request, business_id):
     business = get_object_or_404(Business, id=business_id)
     get_business_reviews(business)
     reviews = Review.objects.filter(business=business).order_by('publish_date')
-    ylpline_ratings, review_ratings = get_review_graph_data(business)
+    ylpline_ratings, review_ratings, current_ylpline_rating = get_review_graph_data(business)
     review_count = reviews.count()
     review_average = round(reviews.aggregate(Avg('rating'))['rating__avg'], 2)
     context = {'reviews': reviews,
                'review_count': review_count,
                'review_average': review_average,
+               'current_ylpline_rating': current_ylpline_rating,
                'ylpline_ratings': ylpline_ratings,
                'review_ratings': review_ratings,
                }

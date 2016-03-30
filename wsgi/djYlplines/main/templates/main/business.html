@@ -14,7 +14,10 @@
         <p>
             Number of reviews: {{ review_count }}
             <br>
-            Average of reviews: {{ review_average }}
+            <br>
+            ylpline calculated rating (using time-based exponential smoothing): {{ current_ylpline_rating }}
+            <br>
+            Yelp average of reviews: {{ review_average }}
         </p>
         <ul>
         {% for review in reviews %}
