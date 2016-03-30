@@ -26,6 +26,7 @@ from os import path
 from bs4 import BeautifulSoup
 from bs4 import SoupStrainer
 from yelp.client import Client
+from yelp.endpoint.search import Search
 from yelp.oauth1_authenticator import Oauth1Authenticator
 
 from main.models import Review, Business
@@ -113,7 +114,8 @@ def run_query(query):
         'term': query,
     }
     print("before search")
-    response = client.search(location, **params)
+    search = Search(client)
+    response = search.search(location, **params)
     print("after search")
     businesses = response.businesses
     return businesses

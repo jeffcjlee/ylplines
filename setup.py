@@ -19,7 +19,8 @@ setup(
         'requests',
         'grequests',
         'coverage>=4.1b2',
-        'coveralls'
+        'coveralls',
+        'setuptools>=18.1',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
