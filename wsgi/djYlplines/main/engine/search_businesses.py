@@ -17,6 +17,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """
 import io
 import json
+import os
+
 import grequests
 
 from datetime import datetime, timedelta
@@ -45,13 +47,23 @@ def get_yelp_api_keys_filepath():
 
 def get_yelp_api_client():
     """Get the Yelp API client"""
-    file_path = get_yelp_api_keys_filepath()
 
-    with io.open(file_path, 'r') as cred:
-        creds = json.load(cred)
-        auth = Oauth1Authenticator(**creds)
-        client = Client(auth)
-        return client
+    if 'OPENSHIFT_REPO_DIR' in os.environ or 'TRAVIS' in os.environ:
+        auth = Oauth1Authenticator(
+            consumer_key=os.environ['YELP_CONSUMER_KEY'],
+            consumer_secret=os.environ['YELP_CONSUMER_SECRET'],
+            token=os.environ['YELP_TOKEN'],
+            token_secret=os.environ['YELP_TOKEN_SECRET']
+        )
+    else:
+        file_path = get_yelp_api_keys_filepath()
+
+        with io.open(file_path, 'r') as cred:
+            creds = json.load(cred)
+            auth = Oauth1Authenticator(**creds)
+
+    client = Client(auth)
+    return client
 
 
 def save_business(id, name, image_url, url, review_count, rating):
