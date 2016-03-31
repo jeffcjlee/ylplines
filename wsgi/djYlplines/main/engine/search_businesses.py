@@ -254,7 +254,7 @@ def get_business_reviews(business, debug=False):
     print("Concurrent pull start")
     concurrency_pull_start = default_timer()
     urls = create_urls_list(business.url, num_reviews)
-    MAX_WORKERS = urls.__len__() #max(urls.__len__()//3, 20)
+    MAX_WORKERS = 1000 # urls.__len__() #max(urls.__len__()//3, 20)
     spoolup_start = default_timer()
     session = FuturesSession(max_workers=MAX_WORKERS)
     spoolup_end = default_timer()
