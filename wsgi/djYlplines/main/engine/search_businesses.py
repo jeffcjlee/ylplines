@@ -264,7 +264,7 @@ def get_business_reviews(business, debug=False):
     print('sending out...', end="", flush=True)
     for i, url in enumerate(urls):
         print(str(i) + '...', end="", flush=True)
-        future = session.get(url, background_callback=bg_cb)
+        future = session.get(url)#, background_callback=bg_cb)
         futures.append(future)
 
     print("")
