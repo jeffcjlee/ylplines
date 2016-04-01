@@ -254,21 +254,26 @@ def get_business_reviews(business, debug=False):
     print("Concurrent pull start")
     concurrency_pull_start = default_timer()
     urls = create_urls_list(business.url, num_reviews)
-    MAX_WORKERS = urls.__len__()//2 #max(urls.__len__()//3, 20)
+    MAX_WORKERS = max(urls.__len__()//3, 20)
     spoolup_start = default_timer()
     session = FuturesSession(max_workers=MAX_WORKERS)
     spoolup_end = default_timer()
     print("Spoolup : %s" % str(spoolup_end-spoolup_start))
     futures = []
     responses = []
-    for url in urls:
+    print('sending out...', end="", flush=True)
+    for i, url in enumerate(urls):
+        print(str(i) + '...', end="", flush=True)
         future = session.get(url, background_callback=bg_cb)
         futures.append(future)
 
+    print("")
+
+    print('response received...', end="", flush=True)
     for i, future in enumerate(futures, 1):
         response = future.result()
         responses.append(response)
-        print('response %s status: %s' % (i, str(response.status_code)))
+        print(str(i) + '...', end="", flush=True)
 
     concurrency_pull_end = default_timer()
     print("Concurrent pull end.")
