@@ -277,7 +277,7 @@ def get_business_reviews(business, debug=False):
 
     concurrency_pull_end = default_timer()
     print("Concurrent pull end.")
-    print('Concurrency pull duration: %s seconds' % str(concurrency_pull_end-concurrency_pull_start))
+    print('Concurrency pull duration: %s secondss' % str(concurrency_pull_end-concurrency_pull_start))
 
     print('Begin response processing')
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
