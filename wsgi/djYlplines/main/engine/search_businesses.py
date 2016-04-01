@@ -273,7 +273,7 @@ def get_business_reviews(business, debug=False):
     for i, future in enumerate(futures, 1):
         response = future.result()
         responses.append(response)
-        print(str(i) + ": " + str(response.status_code) + '...', end="", flush=True)
+        print(str(i) + ": " + str(response.status_code) + " " + str(response.reason) + '...', end="", flush=True)
 
     concurrency_pull_end = default_timer()
     print("Concurrent pull end.")
