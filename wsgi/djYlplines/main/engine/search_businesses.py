@@ -269,7 +269,7 @@ def get_business_reviews(business, debug=False):
 
     print("")
 
-    print('response received...', end="", flush=True)
+    print('response receivedd...', end="", flush=True)
     for i, future in enumerate(futures, 1):
         response = future.result()
         responses.append(response)
