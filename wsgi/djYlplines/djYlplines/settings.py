@@ -128,7 +128,7 @@ if ON_OPENSHIFT:
         }
     }
 elif ON_TRAVIS:
-    DEBUG = True
+    DEBUG = False
     ALLOWED_HOSTS = ['*']
     DATABASES = {
         'default': {
