@@ -254,7 +254,8 @@ def get_business_reviews(business, debug=False):
     print("Concurrent pull start")
     concurrency_pull_start = default_timer()
     urls = create_urls_list(business.url, num_reviews)
-    MAX_WORKERS = 50 #max(urls.__len__()//3, 20)
+    print(str(urls))
+    MAX_WORKERS = 10 #max(urls.__len__()//3, 20)
     spoolup_start = default_timer()
     session = FuturesSession(max_workers=MAX_WORKERS)
     spoolup_end = default_timer()
@@ -263,13 +264,13 @@ def get_business_reviews(business, debug=False):
     responses = []
     print('sending out...', end="", flush=True)
     for i, url in enumerate(urls):
-        print(str(i) + '...', end="", flush=True)
+        print(str(i) + str(url) + '...', end="", flush=True)
         future = session.get(url, background_callback=bg_cb)
         futures.append(future)
 
     print("")
 
-    print('response receivedd...', end="", flush=True)
+    print('response received...', end="", flush=True)
     for i, future in enumerate(futures, 1):
         response = future.result()
         responses.append(response)
@@ -335,7 +336,8 @@ def create_urls_list(business_url, num_reviews):
 
     for i in range(num_requests):
         start = i * NUM_REVIEWS_PER_PAGE
-        urls.append(business_url + '?' + 'sort_by=date_desc' + '&' + 'start=' + str(start))
+        urls.append('http://google.com')
+        #urls.append(business_url + '?' + 'sort_by=date_desc' + '&' + 'start=' + str(start))
     return urls
 
 
