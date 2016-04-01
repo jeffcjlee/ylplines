@@ -1,22 +1,85 @@
 {% extends 'base.html' %}
 {% load staticfiles %}
+{% load widget_tweaks %}
 
 {% block title %}Clarity for Yelp{% endblock %}
-
+{% block scripts %}
+    <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,300,900' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Open+Sans:400,700,800' rel='stylesheet' type='text/css'>
+{% endblock %}
 {% block body %}
-    <p>
-        Version: 0.0.1
-    </p>
-    <div>
-        {% if error_message %}
-            <p><strong>{{ error_message }}</strong></p>
-        {% endif %}
+    <div id="wrapper">
+        <div id="header">
+            <div id="banner">
+                <a id="home_link" href="/">
+                <div id="banner_logo">
 
-        <!-- <form action="{# url 'main:search_businesses' #}" method="get"> -->
-        <form method="get">
-            {{ form }}
-            <input type="submit" value="Submit" />
-        </form>
+                        <span class="ylp">ylp</span><span class="lines">lines</span>
+
+                </div>
+                       </a>
+                <div id="banner_menu">
+                    <a href="/about/">ABOUT</a>
+                </div>
+            </div>
+        </div>
+
+        <div id="content-wrapper">
+            <div id="content">
+                <div id="content_hero">
+                    <div id="content_hero_title">
+                        <span id="content_title_subtitle">C L A R I T Y &nbsp;&nbsp; F O R  &nbsp;&nbsp; Y E L P</span>
+                        <br>
+                        <span id="content_title_title">
+                            <span class="ylp">ylp</span><span class="lines">lines</span>
+                        </span>
+                        <br>
+                        </div>
+                    <br>
+                    <span id="content_hero_amuse">How has a business performed over time?</span>
+                </div>
+                <div id="query_form">
+
+                    <div class="form_input">
+                       {% comment %} <input type="text" class="form_label" value="Find" disabled/>
+                        <input type="text" placeholder="pho, tacos, Lou's,..." class="form_value" />
+
+                        <input type="text" class="form_label" value="Near" disabled/>
+                        <input type="text" placeholder="San Francisco" class="form_value" />
+
+                        <div id="searchfake">
+                            Go!!
+                        </div>{% endcomment %}
+
+                        {% if error_message %}
+                            <p><strong>{{ error_message }}</strong></p>
+                        {% endif %}
+                        <form method="get">
+                            <input type="text" class="form_label" value="Find" disabled/>
+                            {{ form.query|add_class:'form_value'|attr:"placeholder:pho, tacos, Lou's,..." }}
+
+                            <input type="text" class="form_label" value="Near" disabled/>
+                            {{ form.location|add_class:'form_value'|attr:'placeholder:San Francisco'}}
+
+
+                            <input id="submit_button" type="submit" value="Submit" />
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="footer">
+            <div id="footer_content">
+                <span id="footer_content_text">Copyright &copy; 2016 - Jeff Lee</span>
+            </div>
+            <div id="version">
+                <span id="version_text">Version: 0.0.2</span>
+            </div>
+        </div>
     </div>
+
+
 
 {% endblock %}

@@ -19,5 +19,5 @@ from django import forms
 
 
 class FrontSearchForm(forms.Form):
-    query = forms.CharField(label='Enter search terms', max_length=200)
-    location = forms.CharField(label='Enter location', max_length=100)
+    query = forms.CharField(max_length=200)
+    location = forms.CharField(max_length=100)

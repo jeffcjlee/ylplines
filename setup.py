@@ -19,6 +19,7 @@ setup(
         'requests-futures>=0.9.7',
         'coverage>=4.1b2',
         'coveralls',
+        'django-widget-tweaks',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
