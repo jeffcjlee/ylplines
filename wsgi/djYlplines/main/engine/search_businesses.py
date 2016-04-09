@@ -95,10 +95,16 @@ def save_business(id, name, image_url, url, review_count, rating):
 
 def search_for_businesses(query="", location=""):
     """Search for businesses that match the search string and return a list of businesses"""
+    if location == "":
+        location = 'San Francisco'
+
     print("Enter search_for_businesses")
     businesses = run_query(query, location)
-
+    businesses = businesses[:10]
     for cur_business in businesses:
+        has_reviews = Review.objects.filter(business_id=cur_business.id).exists()
+        cur_business.has_reviews = has_reviews;
+
         save_business(cur_business.id,
                       cur_business.name,
                       cur_business.image_url,
@@ -117,11 +123,13 @@ def run_query(query, location):
     params = {
         'term': query,
     }
-    print("before search")
+
     search = Search(client)
     response = search.search(location, **params)
-    print("after search")
+
     businesses = response.businesses
+    if not businesses:
+        businesses = []
     return businesses
 
 #########################################################
@@ -151,14 +159,14 @@ def bg_cb(session, response):
         publish_date = datetime.strptime(publish_date, '%Y-%m-%d').date()
         publish_dates.append(publish_date)
 
-    sel = CSSSelector('p[itemprop="description"]')
-    texts = []
-    for e in sel(tree):
-        #text = e.replace(u'\xa0', u' ')
-        texts.append(e)
+    #sel = CSSSelector('p[itemprop="description"]')
+    #texts = []
+    #for e in sel(tree):
+    #    #text = e.replace(u'\xa0', u' ')
+    #    texts.append(e)
     #texts.append(raw_text.get_text().replace(u'\xa0', u' '))
 
-    response.data = [ids, ratings, publish_dates, texts]
+    response.data = [ids, ratings, publish_dates] #,texts]
 
 
 def get_business_reviews(business, debug=False):
@@ -246,12 +254,20 @@ def process_async_response(response, business, latest_review_date):
     ids = response.data[0]
     ratings = response.data[1]
     publish_dates = response.data[2]
-    texts = response.data[3]
+    #texts = response.data[3]
 
-    for id, rating, publish_date, text in zip(ids, ratings, publish_dates, texts):
+    for id, rating, publish_date in zip(ids, ratings, publish_dates):
         if not Review.objects.filter(id=id).exists():
             if latest_review_date is not None and publish_date < latest_review_date:
                 continue
-            review = Review(id=id, business=business, rating=rating, publish_date=publish_date, text=text)
+            review = Review(id=id, business=business, rating=rating, publish_date=publish_date)
             review.save()
+
+    # save for in case we want to store text
+    # for id, rating, publish_date, text in zip(ids, ratings, publish_dates, texts):
+    #     if not Review.objects.filter(id=id).exists():
+    #         if latest_review_date is not None and publish_date < latest_review_date:
+    #             continue
+    #         review = Review(id=id, business=business, rating=rating, publish_date=publish_date, text=text)
+    #         review.save()
 

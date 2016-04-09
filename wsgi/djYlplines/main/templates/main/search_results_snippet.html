@@ -1,0 +1,86 @@
+{% load staticfiles %}
+
+{% if businesses %}
+    <div class="businesses_wrapper">
+        <div id="results_title">
+            Search Results
+        </div>
+        {% for business in businesses %}
+            <div class="business_wrapper"
+                 data-business_id="{{ business.id }}"
+                 data-has_reviews="{{ business.has_reviews }}">
+
+                <div class="business_image_div">
+                    <img class="business_image" src="{{ business.image_url }}" />
+                    <div class="shadow"></div>
+                </div>
+
+                <div class="business_content">
+                    <div class="business_bar">
+                        <div class="business_name_div">
+                            <span class="business_name">
+                                {{ business.name }}
+                            </span>
+                        </div>
+                        <div class="details_button_div">
+                        <a href="{% url 'main:business' business.id %}">
+                            <div class="details_button" disabled>
+                                <span class="details_button_message">
+                                    Details
+                                </span>
+                            </div>
+                        </a>
+                            </div>
+                    </div>
+
+                    <div class="business_info">
+                        <div class="business_left">
+                            <div class="business_location_div">
+                                <div class="business_neighborhood">
+                                    {{ business.location.display_address.1 }}
+                                </div>
+
+                                <div class="business_address">
+                                    {{ business.location.display_address.0 }}
+                                    <br>
+                                    {{ business.location.display_address.2 }}
+                                </div>
+                            </div>
+                            <div class="business_yelp_rating">
+                                <a href="{{ business.url }}" target="_blank">
+                                    <img src="{{ business.rating_img_url_large }}" height='20' title="Go to Yelp business page" alt="Go to Yelp business page" />
+                                </a>
+                            </div>
+                        </div>
+                        <div class="business_right">
+                            <div class="shield shield_empty" >
+                                <div class="shield_text_div empty_shield_text_div">
+                                    We haven't fetched reviews for this business yet.
+                                </div>
+                                <div class="load_button_div">
+
+                                    <div class="load_button" type="button">
+
+                                        <span class="load_button_message">Fetch reviews!</span>
+
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="shield shield_loading">
+                                <div class="shield_text_div loading_shield_text_div">
+                                    <img class="loader_image" src="{% static "main/images/loader.gif" %}"/>
+                                    <span class="loading_message">
+                                        Reticulating splines...
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="ylp_content">
+                                {% include "main/retrieve_ylp_snippet.html" %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}

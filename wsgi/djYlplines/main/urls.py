@@ -13,4 +13,6 @@ urlpatterns = [
     url(r'^/?$', views.index, name='index'),
     url(r'^results$', views.search_businesses, name='results'),
     url(r'^business/(?P<business_id>.+)/$', views.business, name='business'),
+    url(r'^search/$', "main.views.search_with_ajax", name="search"),
+    url(r'^retrieve_ylp/$', "main.views.retrieve_ylp_with_ajax", name="retrieve_ylp"),
 ]

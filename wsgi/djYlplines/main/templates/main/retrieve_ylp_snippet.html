@@ -1,0 +1,53 @@
+<div class="sparkline_div">
+    <div class="sparkline_title">
+        <span class="sparkline_title">
+            Recent Trend
+        </span>
+    </div>
+    <div class="sparkline_content">
+        {{ sparkline }}
+    </div>
+</div>
+<div class="trend_div">
+    <div class="trend_title">
+        <span class="sparkline_title">
+            At A Glance
+        </span>
+    </div>
+    <div class="trend_content">
+        <div class="sparkline_6mo">
+            <div class="sparkline_6mo_content">
+                {{ sparkline_6mo }}
+            </div>
+            <div class="chart_title sparkline_6mo_title">
+                6 mo
+            </div>
+        </div>
+        <div class="sparkline_12mo">
+            <div class="sparkline_12mo_content">
+                {{ sparkline_12mo }}
+            </div>
+            <div class="chart_title sparkline_12mo_title">
+                12 mo
+            </div>
+        </div>
+        <div class="sparkline_24mo">
+            <div class="sparkline_24mo_content">
+                {{ sparkline_24mo }}
+            </div>
+            <div class="chart_title sparkline_24mo_title">
+                24 mo
+            </div>
+        </div>
+    </div>
+</div>
+<div class="ylp_rating">
+    <div class="ylp_rating_title">
+        ylp rating
+    </div>
+    <div class="ylp_rating_content">
+        <span class="ylp_rating_span">
+        {{ smooth_rating|floatformat:'1' }}
+            </span>
+    </div>
+</div>
