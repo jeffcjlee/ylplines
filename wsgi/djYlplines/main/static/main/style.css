@@ -278,13 +278,15 @@ input[type="text"].form_value{
     color: #3493ff;
 }
 
-#results_title {border-bottom: 0px solid #FFFFFF;
-background-color: #FFFFFF;
-padding: 5px 14px 0px 13px;
-font-size: 1.7em;
-font-family: 'Roboto', 'sans serif';
-font-weight: 300;
-color: #716d73;}
+#results_title {
+    border-bottom: 0 solid #FFFFFF;
+    background-color: #FFFFFF;
+    padding: 5px 14px 0px 13px;
+    font-size: 1.7em;
+    font-family: 'Roboto', 'sans serif';
+    font-weight: 300;
+    color: #716d73;
+}
 
 .business_wrapper {
     border: 1px solid #e2e2e2;

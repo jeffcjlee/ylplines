@@ -1,33 +1,28 @@
-"""
-ylplines - Clarity for Yelp
-Copyright (C) 2016  Jeff Lee
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""
+# ylplines - Clarity for Yelp
+# Copyright (C) 2016  Jeff Lee
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+"""Module handles all communication and fetching actions with Yelp."""
 import io
 import json
 import os
-import sys
 
 from lxml.cssselect import CSSSelector
 from lxml.html import fromstring
 from datetime import datetime, timedelta
-import time
 from timeit import default_timer
 from os import path
-from bs4 import BeautifulSoup
-from bs4 import SoupStrainer
 from requests_futures.sessions import FuturesSession
 from yelp.client import Client
 from yelp.endpoint.search import Search
@@ -35,24 +30,136 @@ from yelp.oauth1_authenticator import Oauth1Authenticator
 
 from main.models import Review, Business
 
-"""
-Take a search string and return a list of businesses.
-Calls to Yelp API.
-"""
 # ==== CONSTANTS
+# Yelp only shows 20 reviews per page request.
 NUM_REVIEWS_PER_PAGE = 20
+# How long since a business' last fetching should we wait before
+# bothering to fetch again.
+DAYS_TO_DELAY_FETCHING = 200
+# The number of max slave thread workers to be allowed to concurrently exist.
+MAX_WORKERS = 10
+
+#########################################################
+# Search for businesses when given search query
+#########################################################
+
+
+def search_for_businesses(query="", location="", debug=False):
+    """
+    Search for businesses that match against search terms and return
+    a list of businesses.
+
+    :param: query: Search terms
+    :param: location: Geographical location to search in or near
+    :return: A list of Businesses
+    """
+    if debug:
+        location = 'San Francisco'
+    elif location == "":
+        print("Error: %s" %
+              "search_for_businesses: No location input provided.")
+        return []
+
+    businesses = run_query(query, location)
+    # First 10 entries. No pagination yet so KISS.
+    businesses = businesses[:10]
+    for cur_business in businesses:
+        has_reviews = Review.objects.filter(
+            business_id=cur_business.id
+        ).exists()
+        cur_business.has_reviews = has_reviews
+
+        save_business(cur_business.id,
+                      cur_business.name,
+                      cur_business.image_url,
+                      cur_business.url,
+                      cur_business.review_count,
+                      cur_business.rating)
+    return businesses
+
+
+def save_business(id, name, image_url, url, review_count, rating):
+    """
+    Save or update a business to database
+
+    :param: id: Business ID
+    :param: name: Business name
+    :param: image_url: URL to a business image
+    :param: url: URL to the business on Yelp
+    :param: review_count: Number of reviews for the business on Yelp
+    :param: rating: Yelp review rating of business
+    """
+    q_delim_index = url.find('?')
+    url = url[:q_delim_index]  # Strip GET parameters
+
+    # Update existing business in database
+    if Business.objects.filter(id=id).exists():
+        business = Business.objects.get(id=id)
+        business.name = name
+        business.image_url = image_url
+        business.url = url
+        business.review_count = review_count
+        business.rating = rating
+    # Save new business
+    else:
+        business = Business(id=id,
+                            name=name,
+                            image_url=image_url,
+                            url=url,
+                            review_count=review_count,
+                            rating=rating)
+    business.save()
+
+
+def run_query(query, location):
+    """
+    Execute search query to Yelp.
+
+    :param: query: Search terms
+    :param: location: Geographical location to search for
+    :return: A list of Businesses
+    """
+    if location == "":
+        print("Error: %s" % "run_query: No location input provided.")
+        return []
+
+    client = get_yelp_api_client()
+    # Yelp takes search term query in params kwargs,
+    # and location directly as a param in search fxn.
+    params = {
+        'term': query,
+    }
+    search = Search(client)
+    response = search.search(location, **params)
+
+    businesses = response.businesses
+    if not businesses:
+        businesses = []
+    return businesses
 
 
 def get_yelp_api_keys_filepath():
-    """Helper method. Get Yelp API oAuth keys filepath"""
+    """
+    Get Yelp API oAuth keys filepath.
+
+    Only used for local usage of Yelp API.
+
+    :return: Filepath of API keys.
+    :rtype: str
+    """
     base_path = path.dirname(__file__)
-    file_path = path.abspath(path.join(base_path, '..', '..', '..', 'privatekeys', 'yelpAPI.json'))
+    file_path = path.abspath(path.join(base_path, '..', '..', '..',
+                                       'privatekeys', 'yelpAPI.json'))
     return file_path
 
 
 def get_yelp_api_client():
-    """Get the Yelp API client"""
+    """
+    Get the Yelp API client
 
+    :return: Yelp API client
+    :rtype: Yelp Client
+    """
     if 'OPENSHIFT_REPO_DIR' in os.environ or 'TRAVIS' in os.environ:
         auth = Oauth1Authenticator(
             consumer_key=os.environ['YELP_CONSUMER_KEY'],
@@ -71,84 +178,53 @@ def get_yelp_api_client():
     return client
 
 
-def save_business(id, name, image_url, url, review_count, rating):
-    """Save or update a business to DB"""
-    q_delim_index = url.find('?')
-    url = url[:q_delim_index]  # Strip GET parameters
-
-    if Business.objects.filter(id=id).exists():
-        business = Business.objects.get(id=id)
-        business.name = name
-        business.image_url = image_url
-        business.url = url
-        business.review_count = review_count
-        business.rating = rating
-    else:
-        business = Business(id=id,
-                            name=name,
-                            image_url=image_url,
-                            url=url,
-                            review_count=review_count,
-                            rating=rating)
-    business.save()
-
-
-def search_for_businesses(query="", location=""):
-    """Search for businesses that match the search string and return a list of businesses"""
-    if location == "":
-        location = 'San Francisco'
-
-    print("Enter search_for_businesses")
-    businesses = run_query(query, location)
-    businesses = businesses[:10]
-    for cur_business in businesses:
-        has_reviews = Review.objects.filter(business_id=cur_business.id).exists()
-        cur_business.has_reviews = has_reviews;
-
-        save_business(cur_business.id,
-                      cur_business.name,
-                      cur_business.image_url,
-                      cur_business.url,
-                      cur_business.review_count,
-                      cur_business.rating)
-
-    return businesses
-
-
-def run_query(query, location):
-
-    #location = 'San Francisco'
-
-    client = get_yelp_api_client()
-    params = {
-        'term': query,
-    }
-
-    search = Search(client)
-    response = search.search(location, **params)
-
-    businesses = response.businesses
-    if not businesses:
-        businesses = []
-    return businesses
-
 #########################################################
+# Fetch reviews from a business
 #########################################################
+
 
 def get_num_reviews_for_business(business, debug=False):
-    if debug:
-        business = Business.objects.get(id='tadu-ethiopian-kitchen-san-francisco-3')
+    """
+    Retrieves the number of reviews a business in the database has.
 
+    :param: business: The business to retrieve number of reviews in Yelp for.
+    Must be in database.
+    :param: debug: True if debug mode is on.
+    :return: The number of reviews the business has in Yelp.
+    """
+    if debug:
+        business = Business.objects.get(
+            id='tadu-ethiopian-kitchen-san-francisco-3')
     return business.review_count
 
-def bg_cb(session, response):
+
+def parse_results_in_background(session, response):
+    """
+    Parse HTML of request results in order to get review data from a Yelp page.
+
+    Is executed in background by a slave thread.
+    Uses lxml HTML parser to find required ratings/review data
+    from the Yelp website.
+    Be mindful: parsing matches against exact DOM names found in Yelp website.
+    If they decide to change a DOM element name or the DOM structure,
+    this function must be updated.
+
+    Collects all review IDs, review ratings, and review publish dates into
+    their own respective lists.
+    It then appends them to response.data to be consumed by the master thread.
+
+    :param session: The http session this request lives in
+    :param response: The http response provided by Yelp
+    :return: Nothing. Appends data to response.data.
+    """
     content = response.content
 
     tree = fromstring(content)
     sel = CSSSelector('div.review.review--with-sidebar:not(.js-war-widget)')
     ids = [e.get('data-review-id') for e in sel(tree)]
 
-    sel = CSSSelector('div.review.review--with-sidebar:not(.js-war-widget) meta[itemprop="ratingValue"]')
+    sel = CSSSelector(
+        'div.review.review--with-sidebar:not(.js-war-widget) meta[itemprop="ratingValue"]')
     ratings = [e.get('content') for e in sel(tree)]
 
     sel = CSSSelector('div.review.review--with-sidebar:not(.js-war-widget) meta[itemprop="datePublished"]')
@@ -159,53 +235,78 @@ def bg_cb(session, response):
         publish_date = datetime.strptime(publish_date, '%Y-%m-%d').date()
         publish_dates.append(publish_date)
 
-    #sel = CSSSelector('p[itemprop="description"]')
-    #texts = []
-    #for e in sel(tree):
+    # Comment out collecting review text. Maybe in the future we may need this.
+    # sel = CSSSelector('p[itemprop="description"]')
+    # texts = []
+    # for e in sel(tree):
     #    #text = e.replace(u'\xa0', u' ')
     #    texts.append(e)
-    #texts.append(raw_text.get_text().replace(u'\xa0', u' '))
+    # texts.append(raw_text.get_text().replace(u'\xa0', u' '))
 
-    response.data = [ids, ratings, publish_dates] #,texts]
+    response.data = [ids, ratings, publish_dates]  # ,texts]
 
 
 def get_business_reviews(business, debug=False):
+    """
+    Fetches business reviews for a single business and saves it to the database.
+
+    This is a computationally intensive function that makes multiple requests
+    to the Yelp website and collect reviews for a business. Yelp restricts
+    the number of reviews per page, so multiple threads must call multiple
+    requests to collect all business reviews. If a business has 500 reviews,
+    and Yelp only shows 20 reviews per page, 25 http requests must be made to
+    Yelp.
+
+    In the background of each thread, it parses the response HTML content to
+    get the relevant review data for consumption.
+
+    Warning: You must not set the # of max thread workers to be unreasonably
+    high. This will cause an out of memory error in production and cause the
+    production server to crash and restart.
+
+    :param business: The business to fetch reviews for.
+    :param debug: Debug mode is on if True.
+    :return: Nothing. Reviews are saved into the database.
+    """
     if debug:
         business = Business.objects.get(id='blue-bottle-coffee-san-francisco-8')
+    if not business:
+        return
 
     latest_review_date = None
     todays_date = datetime.today().date()
 
-    if business.latest_review_pull and business.latest_review_pull + timedelta(days=200) >= todays_date:
+    # Don't bother fetching if we fetched recently already.
+    if business.latest_review_pull and business.latest_review_pull + \
+            timedelta(days=DAYS_TO_DELAY_FETCHING) >= todays_date:
         return
 
     if Review.objects.filter(business_id=business.id).exists():
-        latest_review_date = Review.objects.filter(business_id=business.id).latest('publish_date').publish_date
+        latest_review_date = Review.objects.filter(
+            business_id=business.id
+        ).latest('publish_date').publish_date
 
     num_reviews = get_num_reviews_for_business(business)
     num_requests = num_reviews // NUM_REVIEWS_PER_PAGE
     if num_reviews % NUM_REVIEWS_PER_PAGE != 1:
         num_requests += 1
+
     print("Concurrent pull start")
+
     concurrency_pull_start = default_timer()
     urls = create_urls_list(business.url, num_reviews)
-    print(str(urls))
-    MAX_WORKERS = 10 #max(urls.__len__()//3, 20)
-    spoolup_start = default_timer()
     session = FuturesSession(max_workers=MAX_WORKERS)
-    spoolup_end = default_timer()
-    print("Spoolup : %s" % str(spoolup_end-spoolup_start))
     futures = []
     responses = []
-    print('sending out...', end="", flush=True)
+
+    # Multi-thread requests and HTML parsing
     for i, url in enumerate(urls):
-        print(str(i) + str(url) + '...', end="", flush=True)
-        future = session.get(url, background_callback=bg_cb)
+        future = session.get(url,
+                             background_callback=parse_results_in_background)
         futures.append(future)
 
-    print("")
-
-    print('response received...', end="", flush=True)
+    # Wait for callbacks to finish
+    print('Response received...', end="", flush=True)
     for i, future in enumerate(futures, 1):
         response = future.result()
         responses.append(response)
@@ -213,8 +314,9 @@ def get_business_reviews(business, debug=False):
 
     concurrency_pull_end = default_timer()
     print("Concurrent pull end.")
-    print('Concurrency pull duration: %s secondss' % str(concurrency_pull_end-concurrency_pull_start))
+    print('Concurrency pull duration: %s seconds' % str(concurrency_pull_end-concurrency_pull_start))
 
+    # Save reviews to database
     print('Begin response processing')
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
 
@@ -223,47 +325,66 @@ def get_business_reviews(business, debug=False):
         print("%s..." % ctr, end="", flush=True)
         if response:
             if response.status_code == 200:
-
-                process_async_response(response, business, latest_review_date)
+                save_reviews(response, business, latest_review_date)
             else:
-                print("Retrieval unsuccessful, got a status code of: " + str(response.status_code))
+                print("Error: retrieval unsuccessful, got a status code of: "
+                      "" + str(response.status_code))
     process_end = default_timer()
     print('\nResponse processing duration: %s seconds' % str(process_end-process_start))
 
+    # Update business that we fetched reviews today
     business.latest_review_pull = todays_date
     business.save()
 
 
-
 def create_urls_list(business_url, num_reviews):
-    """Generate the list of business URLs to extract reviews from given which async loop the program is on"""
+    """
+    Generate the list of business URLs to extract reviews from given
+    which async loop the program is on
 
+    :param: business_url: URL to main business page on Yelp
+    :param: num_reviews: number of reviews the business has on Yelp
+    :return: A list of URLs
+    """
     num_requests = num_reviews // NUM_REVIEWS_PER_PAGE
     if num_reviews % NUM_REVIEWS_PER_PAGE != 1:
         num_requests += 1
     urls = []
 
+    # Must have sort order to be date descending (most recent first).
     for i in range(num_requests):
         start = i * NUM_REVIEWS_PER_PAGE
-        #urls.append('http://google.com')
         urls.append(business_url + '?' + 'sort_by=date_desc' + '&' + 'start=' + str(start))
     return urls
 
 
-def process_async_response(response, business, latest_review_date):
+def save_reviews(response, business, latest_review_date):
+    """
+    Save reviews to database.
+
+    :param response: Holds review data
+    :param business: The business the reviews are for
+    :param latest_review_date: The most recent date we fetched for reviews
+    for the business
+    :return: Nothing. Reviews are saved to database.
+    """
     ids = response.data[0]
     ratings = response.data[1]
     publish_dates = response.data[2]
     #texts = response.data[3]
 
     for id, rating, publish_date in zip(ids, ratings, publish_dates):
+        # Don't bother to save if the review already exists in db.
         if not Review.objects.filter(id=id).exists():
+            # Quit out if the publish date is older than the last fetch date
+            # since everything in the loop now will be older than the last
+            # fetch date.
             if latest_review_date is not None and publish_date < latest_review_date:
                 continue
             review = Review(id=id, business=business, rating=rating, publish_date=publish_date)
             review.save()
 
-    # save for in case we want to store text
+    # Save for in case we want to store text
     # for id, rating, publish_date, text in zip(ids, ratings, publish_dates, texts):
     #     if not Review.objects.filter(id=id).exists():
     #         if latest_review_date is not None and publish_date < latest_review_date:

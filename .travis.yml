@@ -23,7 +23,7 @@ notifications:
   email:
     recipients:
     - jeffcjlee@gmail.com
-    on_success: never
+    on_success: always
     on_failure: never
 deploy:
   provider: openshift
