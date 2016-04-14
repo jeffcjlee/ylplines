@@ -42,6 +42,7 @@ setup(
         'redis',
         'kombu',
         'amqp',
+        'anyjson',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
