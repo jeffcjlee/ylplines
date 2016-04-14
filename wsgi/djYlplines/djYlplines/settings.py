@@ -144,7 +144,7 @@ WSGI_APPLICATION = 'djYlplines.wsgi.application'
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 if ON_OPENSHIFT:
     # THIS MUST BE KEPT FALSE. Controls if debug shows up in production.
-    DEBUG = False
+    DEBUG = True
     ALLOWED_HOSTS = ['*']
     DATABASES = {
         'default': {
