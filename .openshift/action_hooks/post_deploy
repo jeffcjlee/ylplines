@@ -2,3 +2,11 @@
 # This is a simple post deploy hook executed after your application 
 # is deployed and started.  This script gets executed directly, so 
 # it could be python, php, ruby, etc.
+
+echo "Executing celery multi start worker1 -A djYlplines"
+cd $OPENSHIFT_REPO_DIR
+cd wsgi
+cd djYlplines
+rm worker1.pid
+celery multi stop worker1
+celery multi start worker1 -A djYlplines
