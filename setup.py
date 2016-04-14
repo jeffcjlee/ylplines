@@ -39,6 +39,7 @@ setup(
         'Sphinx',
         'celery[redis]',
         'redis',
+        'kombu',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
