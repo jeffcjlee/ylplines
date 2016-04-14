@@ -68,7 +68,7 @@ var load_business = function(button) {
     business_wrapper = $(button).closest('.business_wrapper')
     business_id = $(business_wrapper).data('business_id');
     show_business_is_loading(business_wrapper);
-    process_ylp_retrieval(business_wrapper, business_id, 1);
+    process_enqueue_fetch_reviews(business_wrapper, business_id);
 };
 
 
@@ -85,9 +85,69 @@ var load_results_content = function() {
         }
         else {
             show_business_is_loading(this);
-            process_ylp_retrieval(this, business_id, 0);
+            process_ylp_retrieval(this, business_id);
         }
     })
+};
+
+var process_enqueue_fetch_reviews = function(business_wrapper, business_id) {
+    var processServerResponse = function(server_response_data, status) {
+        //console.log("Server data: " + server_response_data)
+        var task_id = server_response_data;
+        console.log("task_id: " + task_id);
+        setTimeout(function(){
+            process_check_fetch_state(business_wrapper, business_id, task_id)
+        }, 3000);
+        console.log("done with process_enqueue_fetch_reviews");
+    }
+
+    var config = {
+        type: "GET",
+        url: ENQUEUE_FETCH_URL,
+        data: {
+          'business_id': business_id,
+        },
+        dataType: 'html',
+        success: processServerResponse
+    };
+    $.ajax(config);
+};
+
+var process_check_fetch_state = function(business_wrapper, business_id, task_id) {
+    var task_finished = false;
+    console.log("entered process_Check_fetch_state");
+    var processServerResponse = function(server_response_data, status) {
+        var task_state = server_response_data;
+        console.log("task_state: " + task_state);
+
+        if (task_state == 'SUCCESS' && !task_finished) {
+            task_finished = true;
+            process_ylp_retrieval(business_wrapper, business_id);
+        }
+    }
+
+    var check_fetch_status = function(config, counter){
+        if(!task_finished){
+            setTimeout(function(){
+                counter++;
+                console.log("check_fetch_status ctr: " + counter);
+                $.ajax(config);
+                check_fetch_status(config, counter);
+            }, 5000);
+        }
+    }
+
+    var config = {
+        type: "GET",
+        url: CHECK_FETCH_STATE_URL,
+        data: {
+          'task_id': task_id,
+        },
+        dataType: 'html',
+        success: processServerResponse
+    };
+
+    check_fetch_status(config, 0);
 };
 
 /**
@@ -95,10 +155,8 @@ var load_results_content = function() {
  *
  * @param business_wrapper DOM element of the business
  * @param business_id Business ID
- * @param do_retrieve If true will fetch reviews from Yelp. Otherwise just looks
- * to the database.
  */
-var process_ylp_retrieval = function(business_wrapper, business_id, do_retrieve) {
+var process_ylp_retrieval = function(business_wrapper, business_id) {
     var processServerResponse = function(server_response_data, status) {
         var sparkline_str, sparkline_data, sparkline, ylp_rating
 
@@ -179,7 +237,6 @@ var process_ylp_retrieval = function(business_wrapper, business_id, do_retrieve)
         url: RETRIEVE_YLP_URL,
         data: {
           'business_id': business_id,
-          'do_retrieve': do_retrieve,
         },
         dataType: 'html',
         success: processServerResponse

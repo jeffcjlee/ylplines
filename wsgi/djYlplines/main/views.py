@@ -17,10 +17,13 @@
 from django.db.models import Avg
 from django.shortcuts import render, get_object_or_404, render_to_response
 
+from djYlplines.celery import app
 from main.engine.smoothing import get_review_graph_data
 from main.models import Business, Review
-from .forms import FrontSearchForm
-from .engine.search_businesses import search_for_businesses, get_business_reviews
+from main.forms import FrontSearchForm
+from main.engine.search_businesses import search_for_businesses, \
+    get_business_reviews
+from main import tasks
 
 
 def index(request):
@@ -69,13 +72,7 @@ def retrieve_ylp_with_ajax(request):
     """Handles ajax request to fetch reviews for a business"""
     if 'business_id' in request.GET:
         business_id = request.GET.get('business_id')
-        do_retrieve = int(request.GET.get('do_retrieve'))
-        print(str(type(do_retrieve)))
-
         business = Business.objects.get(id=business_id)
-
-        if do_retrieve == 1:
-            get_business_reviews(business)
 
         ylpline_ratings, review_ratings, smooth_rating, sparkline, sparkline_6mo, sparkline_12mo, sparkline_24mo = get_review_graph_data(business)
         context = {
@@ -87,6 +84,38 @@ def retrieve_ylp_with_ajax(request):
         }
     return render_to_response("main/retrieve_ylp_snippet.html", context)
 
+
+def enqueue_fetch_reviews_with_ajax(request):
+    if 'business_id' in request.GET:
+        business_id = request.GET.get('business_id')
+        task_result = tasks.fetch_reviews.delay(business_id)
+        #print(type(task_result))
+        task_id = task_result.id
+        #print(type(task_id))
+        print("Task ID: " + str(task_id))
+        #print(type(task_result.state))
+        print("Task State: " + str(task_result.state))
+        #task_state = task.state
+        context = {
+            'task_id': task_id,
+        #    'task_state': task_state,
+        }
+    return render_to_response("main/task_id_snippet.html",
+                              context)
+
+def check_fetch_state_with_ajax(request):
+    if 'task_id' in request.GET:
+        task_id = request.GET.get('task_id').rstrip()
+        print("check: " + str(task_id))
+        task_result = tasks.fetch_reviews.AsyncResult(task_id)
+        print("task result: " + str(task_result))
+        print("result: " + str(task_result.result))
+        print(str(task_result.state))
+        task_state = task_result.state
+        context = {
+            'task_state': task_state,
+        }
+    return render_to_response("main/task_state_snippet.html", context)
 
 def business(request, business_id):
     """Renders the business details page"""

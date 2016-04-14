@@ -13,9 +13,32 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"""Start the Django project directive script."""
+"""Async queue tasks for the main app"""
 from __future__ import absolute_import
 
-# This will make sure the app is always imported when
-# Django starts so that shared_task will use this app.
-from .celery import app as celery_app  # noqa
+from celery import shared_task
+
+from main.engine.search_businesses import get_business_reviews
+from main.models import Business
+
+
+@shared_task
+def fetch_reviews(business_id):
+    business = Business.objects.get(id=business_id)
+    get_business_reviews(business)
+    return True
+
+
+@shared_task
+def add(x, y):
+    return x + y
+
+
+@shared_task
+def mul(x, y):
+    return x * y
+
+
+@shared_task
+def xsum(numbers):
+    return sum(numbers)

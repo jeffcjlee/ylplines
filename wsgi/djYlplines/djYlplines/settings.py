@@ -22,12 +22,40 @@ https://docs.djangoproject.com/en/1.8/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/1.8/ref/settings/
 """
+from __future__ import absolute_import
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
 import sys
 
+
 from socket import gethostname
+
+# Track if the current environment is the prd server.
+ON_OPENSHIFT = False
+if 'OPENSHIFT_REPO_DIR' in os.environ:
+    ON_OPENSHIFT = True
+
+# Track if the current environment is the build server.
+ON_TRAVIS = False
+if 'TRAVIS' in os.environ:
+    ON_TRAVIS = True
+
+# Celery settings
+if ON_OPENSHIFT:
+    BROKER_URL = os.environ['REDIS_URL']
+    CELERY_RESULT_BACKEND = os.environ['REDIS_URL']
+else:
+    BROKER_URL = 'redis://'
+    CELERY_RESULT_BACKEND = 'redis://'
+
+#: Only add pickle to this list if your broker is secured
+#: from unwanted access (see userguide/security.html)
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_DEFAULT_RATE_LIMIT = '20/m'
+CELERYD_CONCURRENCY = 1
 
 # Abstractify directory paths
 DJ_PROJECT_DIR = os.path.dirname(__file__)
@@ -42,16 +70,6 @@ sys.path.append(os.path.join(REPO_DIR, 'libs'))
 # Instantiate secret key for Django
 import secrets
 SECRETS = secrets.getter(os.path.join(DATA_DIR, 'secrets.json'))
-
-# Track if the current environment is the prd server.
-ON_OPENSHIFT = False
-if 'OPENSHIFT_REPO_DIR' in os.environ:
-    ON_OPENSHIFT = True
-
-# Track if the current environment is the build server.
-ON_TRAVIS = False
-if 'TRAVIS' in os.environ:
-    ON_TRAVIS = True
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = SECRETS['secret_key']

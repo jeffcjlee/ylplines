@@ -3,6 +3,7 @@ python:
 - '3.3'
 services:
 - postgresql
+- redis-server
 addons:
   postgresql: '9.2'
 env:
@@ -23,8 +24,8 @@ notifications:
   email:
     recipients:
     - jeffcjlee@gmail.com
-    on_success: always
-    on_failure: never
+    on_success: change
+    on_failure: change
 deploy:
   provider: openshift
   user: jeffcjlee@gmail.com

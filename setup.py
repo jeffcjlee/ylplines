@@ -21,7 +21,7 @@ from setuptools import setup
 
 setup(
     name='ylplines',
-    version='0.0.1',
+    version='0.1.0',
     description='Yelp trends',
     author='Jeff Lee',
     author_email='jeffcjlee@gmail.com',
@@ -32,12 +32,13 @@ setup(
         'yelp',
         'lxml>=3.6',
         'cssselect',
-        'beautifulsoup4',
         'requests-futures>=0.9.7',
         'coverage>=4.1b2',
         'coveralls',
         'django-widget-tweaks',
         'Sphinx',
+        'celery[redis]',
+        'redis',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'

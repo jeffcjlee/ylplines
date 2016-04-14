@@ -23,4 +23,8 @@ urlpatterns = [
     url(r'^business/(?P<business_id>.+)/$', views.business, name='business'),
     url(r'^search/$', "main.views.search_with_ajax", name="search"),
     url(r'^retrieve_ylp/$', "main.views.retrieve_ylp_with_ajax", name="retrieve_ylp"),
+    url(r'^enqueue_fetch/$', "main.views.enqueue_fetch_reviews_with_ajax",
+        name="enqueue_fetch"),
+    url(r'^check_fetch_state/$', "main.views.check_fetch_state_with_ajax",
+        name="check_fetch_state"),
 ]

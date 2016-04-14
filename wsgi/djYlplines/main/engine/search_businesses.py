@@ -268,9 +268,11 @@ def get_business_reviews(business, debug=False):
     :param debug: Debug mode is on if True.
     :return: Nothing. Reviews are saved into the database.
     """
+    print("Hello world")
     if debug:
-        business = Business.objects.get(id='blue-bottle-coffee-san-francisco-8')
+        business = Business.objects.get(id='girl-and-the-goat-chicago')
     if not business:
+        print("Hitting it's not a business")
         return
 
     latest_review_date = None
@@ -279,6 +281,7 @@ def get_business_reviews(business, debug=False):
     # Don't bother fetching if we fetched recently already.
     if business.latest_review_pull and business.latest_review_pull + \
             timedelta(days=DAYS_TO_DELAY_FETCHING) >= todays_date:
+        print("Hitting too recent to fetch")
         return
 
     if Review.objects.filter(business_id=business.id).exists():
