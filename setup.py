@@ -37,6 +37,7 @@ setup(
         'coveralls',
         'django-widget-tweaks',
         'Sphinx',
+        'celery',
         'celery[redis]',
         'redis',
         'kombu',
