@@ -40,6 +40,7 @@ setup(
         'celery[redis]',
         'redis',
         'kombu',
+        'amqp',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
