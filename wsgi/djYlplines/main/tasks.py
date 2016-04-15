@@ -18,14 +18,15 @@ from __future__ import absolute_import
 
 from celery import shared_task
 
-from main.engine.search_businesses import get_business_reviews
+import main.engine.search_businesses
+#from main.engine.search_businesses import get_business_reviews
 from main.models import Business
 
 
 @shared_task
-def fetch_reviews(business_id):
+def enqueue_fetch_reviews(business_id, num_reviews=0):
     business = Business.objects.get(id=business_id)
-    get_business_reviews(business)
+    main.engine.search_businesses.get_business_reviews(business, num_reviews)
     return True
 
 

@@ -32,10 +32,12 @@ from main.models import Review, Business
 
 # ==== CONSTANTS
 # Yelp only shows 20 reviews per page request.
+#rom main.tasks import enqueue_fetch_reviews
+import main.tasks
 NUM_REVIEWS_PER_PAGE = 20
 # How long since a business' last fetching should we wait before
 # bothering to fetch again.
-DAYS_TO_DELAY_FETCHING = 200
+DAYS_TO_DELAY_FETCHING = 0
 # The number of max slave thread workers to be allowed to concurrently exist.
 MAX_WORKERS = 10
 
@@ -246,7 +248,7 @@ def parse_results_in_background(session, response):
     response.data = [ids, ratings, publish_dates]  # ,texts]
 
 
-def get_business_reviews(business, debug=False):
+def get_business_reviews(business, num_reviews=0, debug=False):
     """
     Fetches business reviews for a single business and saves it to the database.
 
@@ -265,14 +267,14 @@ def get_business_reviews(business, debug=False):
     production server to crash and restart.
 
     :param business: The business to fetch reviews for.
+    :param num_reviews: If provided, will only get the number of reviews,
+    most recent first. Otherwise, will fetch all reviews of a business.
     :param debug: Debug mode is on if True.
     :return: Nothing. Reviews are saved into the database.
     """
-    print("Hello world")
     if debug:
         business = Business.objects.get(id='girl-and-the-goat-chicago')
     if not business:
-        print("Hitting it's not a business")
         return
 
     latest_review_date = None
@@ -289,9 +291,10 @@ def get_business_reviews(business, debug=False):
             business_id=business.id
         ).latest('publish_date').publish_date
 
-    num_reviews = get_num_reviews_for_business(business)
+    if num_reviews <= 0:
+        num_reviews = get_num_reviews_for_business(business)
     num_requests = num_reviews // NUM_REVIEWS_PER_PAGE
-    if num_reviews % NUM_REVIEWS_PER_PAGE != 1:
+    if num_reviews % NUM_REVIEWS_PER_PAGE != 0:
         num_requests += 1
 
     print("Concurrent pull start")
@@ -394,4 +397,37 @@ def save_reviews(response, business, latest_review_date):
     #             continue
     #         review = Review(id=id, business=business, rating=rating, publish_date=publish_date, text=text)
     #         review.save()
+
+
+def update_business_reviews(business, debug=False):
+    """Checks if a business needs to fetch more reviews that the db does not
+    hold and fetches them from Yelp
+
+    :param business: The business to update reviews for in the db
+    :return: Nothing.
+    """
+
+    if debug:
+        business = Business.objects.get(
+            id='tadu-ethiopian-kitchen-san-francisco-3')
+    num_reviews_in_business = get_num_reviews_for_business(business)
+    num_reviews_in_db = Review.objects.filter(business=business).count()
+    num_reviews_diff = num_reviews_in_business - num_reviews_in_db
+
+    print("num_reviews_in_business: " + str(num_reviews_in_business))
+    print("num_reviews_in_db: " + str(num_reviews_in_db))
+    print("num_reviews_diff: " + str(num_reviews_diff))
+
+    if num_reviews_diff > 0:
+        if num_reviews_diff <= 100:
+            #get a num of pages worth of reviews for business, no queueing
+            get_business_reviews(business, num_reviews_diff)
+        else:
+            # enqueue to update a business with a num of pages worth of
+            # reviews, queue
+            main.tasks.enqueue_fetch_reviews(business, num_reviews_diff)
+
+
+
+
 

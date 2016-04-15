@@ -22,7 +22,7 @@ from main.engine.smoothing import get_review_graph_data
 from main.models import Business, Review
 from main.forms import FrontSearchForm
 from main.engine.search_businesses import search_for_businesses, \
-    get_business_reviews
+    get_business_reviews, update_business_reviews
 from main import tasks
 
 
@@ -69,10 +69,12 @@ def search_with_ajax(request):
 
 
 def retrieve_ylp_with_ajax(request):
-    """Handles ajax request to fetch reviews for a business"""
+    """Handles ajax request to fetch reviews for a business from the db"""
     if 'business_id' in request.GET:
         business_id = request.GET.get('business_id')
         business = Business.objects.get(id=business_id)
+
+        update_business_reviews(business)
 
         ylpline_ratings, review_ratings, smooth_rating, sparkline, sparkline_6mo, sparkline_12mo, sparkline_24mo = get_review_graph_data(business)
         context = {
@@ -86,9 +88,10 @@ def retrieve_ylp_with_ajax(request):
 
 
 def enqueue_fetch_reviews_with_ajax(request):
+    """Handles ajax request to enqueue task to fetch reviews from Yelp"""
     if 'business_id' in request.GET:
         business_id = request.GET.get('business_id')
-        task_result = tasks.fetch_reviews.delay(business_id)
+        task_result = tasks.enqueue_fetch_reviews.delay(business_id)
         #print(type(task_result))
         task_id = task_result.id
         #print(type(task_id))
@@ -107,7 +110,7 @@ def check_fetch_state_with_ajax(request):
     if 'task_id' in request.GET:
         task_id = request.GET.get('task_id').rstrip()
         print("check: " + str(task_id))
-        task_result = tasks.fetch_reviews.AsyncResult(task_id)
+        task_result = tasks.enqueue_fetch_reviews.AsyncResult(task_id)
         print("task result: " + str(task_result))
         print("result: " + str(task_result.result))
         print(str(task_result.state))
@@ -116,6 +119,7 @@ def check_fetch_state_with_ajax(request):
             'task_state': task_state,
         }
     return render_to_response("main/task_state_snippet.html", context)
+
 
 def business(request, business_id):
     """Renders the business details page"""
