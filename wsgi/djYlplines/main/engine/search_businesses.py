@@ -30,7 +30,7 @@ from yelp.client import Client
 from yelp.endpoint.search import Search
 from yelp.oauth1_authenticator import Oauth1Authenticator
 
-from main import tasks
+import main.tasks
 from main.logging import log_exception, log, log_error
 from main.models import Review, Business
 
@@ -501,7 +501,8 @@ def update_business_reviews(business, debug=False):
         else:
             # enqueue to update a business with a num of pages worth of
             # reviews, queue
-            tasks.enqueue_fetch_reviews.delay(business.id, num_reviews_diff)
+            main.tasks.enqueue_fetch_reviews.delay(business.id,
+                                                   num_reviews_diff)
 
 
 
