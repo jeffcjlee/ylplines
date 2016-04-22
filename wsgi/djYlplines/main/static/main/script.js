@@ -45,6 +45,12 @@ var BG_TWO_POINT_ZERO = '#FFEFC0';
 var BG_ONE_POINT_FIVE = '#FFF4C0';
 var BG_ONE_POINT_ZERO = '#FFF9C0';
 
+//Cache the detail graph in memory so we can on-demand load for
+//individual businesses rather than have to create graphs for all at once.
+//For better performance
+var ylpline_ratings_map = {};
+var review_ratings_map = {};
+
 /**
  * Document ready
  */
@@ -67,16 +73,165 @@ var load_business = function(button) {
     $(button).prop('disabled', true);
     business_wrapper = $(button).closest('.business_wrapper')
     business_id = $(business_wrapper).data('business_id');
-    show_business_is_loading(business_wrapper);
+    show_business_is_loading(business_wrapper, true);
     process_enqueue_fetch_reviews(business_wrapper, business_id);
 };
 
+/**
+ * Expand or hide the details section of a business.
+ *
+ * @param business_wrapper The wrapper div for a specific business
+ */
+var toggle_details_section = function(business_wrapper) {
+    var details_section
+
+    details_section = $('.details_section', business_wrapper);
+    if (parseInt(details_section.height()) > 0) {
+         $(details_section).animate({ 'height': 0}, SLIDE_ANIMATION_DURATION);
+         $(details_section).css('border-bottom-width', '0px');
+    }
+    else {
+         $(details_section).animate({ 'height': 300}, SLIDE_ANIMATION_DURATION);
+         $(details_section).css('border-bottom-width', '2px');
+         render_details_graph(business_wrapper);
+    }
+};
+
+/**
+ * Render the detail graph for a specific business.
+ *
+ * @param business_wrapper The wrapper div for a specific business.
+ */
+var render_details_graph = function(business_wrapper) {
+    var business_id = $(business_wrapper).data('business_id');
+
+    var chart1
+        chart1 = new Highcharts.StockChart({
+            chart: {
+                renderTo: $('.details_graph', business_wrapper)[0],
+                'zoomType': 'x',
+                'backgroundColor': 'rgb(250,250,250)',
+            },
+            series: [
+                {
+                    'name': 'ylpline rating',
+                    'type': 'spline',
+                    'color': 'rgba(2,97,255,1)',
+                    'data': ylpline_ratings_map[business_id],
+                    'animation': {duration: 3000},
+                    'dataGrouping': {
+                        'groupPixelWidth': 7,
+                        'enabled': true,
+                        'smoothed': true,
+                    },
+                    'zIndex': 10,
+                    'tooltip': {
+                        valueDecimals: 2,
+                    },
+                    'regression': true,
+                    'regressionSettings': {
+                        type: 'polynomial',
+                        color: 'rgba(0,0,0,0.4)',
+                        animation: 4000,
+                    },
+                },
+                {
+                    'name': 'review rating',
+                    'type': 'scatter',
+                    'color': 'rgba(84,234,241,0.15)',
+                    'data': review_ratings_map[business_id],
+                    'animation': {duration: 2000},
+                    'zIndex': 9,
+                    'enableMouseTracking': false,
+                }
+            ],
+            navigator: {
+                margin: 2,
+                maskFill: 'rgba(52,147,255,0.3)',
+                series: {
+                    color: 'rgba(52,147,255,1)',
+                    fillOpacity: 0.09,
+                    lineWidth: 1,
+                }
+            },
+            yAxis: {
+                tickInterval: 1,
+                minorTickInterval: 0.5,
+                min: 1,
+                max: 5,
+                gridLineColor: 'rgba(0,0,0,0.1)',
+                gridLine_Width: 2,
+                minorGridLineColor: 'rgba(0,0,0,0.05)',
+                plotBands: [
+                    {
+                        color: BG_FOUR_POINT_FIVE,
+                        from: 4.5,
+                        to: 5
+                    },
+                    {
+                        color: BG_FOUR_POINT_ZERO,
+                        from: 4,
+                        to: 4.5
+                    },
+                    {
+                        color: BG_THREE_POINT_FIVE,
+                        from: 3.5,
+                        to: 4
+                    },
+                    {
+                        color: BG_THREE_POINT_ZERO,
+                        from: 3,
+                        to: 3.5
+                    },
+                    {
+                        color: BG_TWO_POINT_FIVE,
+                        from: 2.5,
+                        to: 3
+                    },
+                    {
+                        color: BG_TWO_POINT_ZERO,
+                        from: 2,
+                        to: 2.5
+                    },
+                    {
+                        color: BG_ONE_POINT_FIVE,
+                        from: 1.5,
+                        to: 2
+                    },
+                    {
+                        color: BG_ONE_POINT_ZERO,
+                        from: 1,
+                        to: 1.5
+                    },
+                ],
+            },
+            plotOptions: {
+                series: {
+                    allowPointSelect: true,
+                    states: {
+                        hover: {
+                            lineWidth: 2,
+                        },
+                    },
+                },
+            },
+            credits: {
+                enabled: false,
+            },
+
+        });
+
+};
 
 /**
  * Load business list results given the search query
  */
 var load_results_content = function() {
     var business_id;
+
+    ylpline_ratings_map = {};
+    review_ratings_map = {};
+
     $('.business_wrapper').each(function() {
         business_id = $(this).data('business_id');
         
@@ -84,21 +239,23 @@ var load_results_content = function() {
             show_business_is_empty(this);
         }
         else {
-            show_business_is_loading(this);
+            show_business_is_loading(this, false);
             process_ylp_retrieval(this, business_id);
         }
     })
 };
 
+/**
+ * Ajax call to enqueue fetching of reviews for a business. Then calls
+ * to poll the server in intervals.
+ *
+ * @param business_wrapper The div wrapper for a business
+ * @param business_id The ID of a business
+ */
 var process_enqueue_fetch_reviews = function(business_wrapper, business_id) {
     var processServerResponse = function(server_response_data, status) {
-        //console.log("Server data: " + server_response_data)
         var task_id = server_response_data;
-        console.log("task_id: " + task_id);
-        setTimeout(function(){
-            process_check_fetch_state(business_wrapper, business_id, task_id)
-        }, 3000);
-        console.log("done with process_enqueue_fetch_reviews");
+        process_check_fetch_state(business_wrapper, business_id, task_id);
     }
 
     var config = {
@@ -113,27 +270,68 @@ var process_enqueue_fetch_reviews = function(business_wrapper, business_id) {
     $.ajax(config);
 };
 
+/**
+ * Ajax call to poll the server for if fetching of reviews for a business
+ * is PENDING, STARTED, or SUCCESS.
+ *
+ * @param business_wrapper Div wrapper of a business
+ * @param business_id ID of the business
+ * @param task_id The queue task ID to fetch reviews for a business
+ */
 var process_check_fetch_state = function(business_wrapper, business_id, task_id) {
     var task_finished = false;
-    console.log("entered process_Check_fetch_state");
-    var processServerResponse = function(server_response_data, status) {
-        var task_state = server_response_data;
-        console.log("task_state: " + task_state);
+    var times_checked = 0;
+    var prev_task_state = 'PENDING';
 
-        if (task_state == 'SUCCESS' && !task_finished) {
+    var processServerResponse = function(server_response_data, status) {
+        var raw_task_state = server_response_data.split('^');
+        var task_state = raw_task_state[0];
+        var task_progress = 0;
+        if (task_state == 'PROGRESS') {
+            task_progress = raw_task_state[1];
+            if (task_progress == '100') {
+                task_progress = 0;
+            }
+        }
+        else if (task_state == 'SUCCESS') {
+            task_progress = 100;
+        }
+
+        //console.log("task_state: " + task_state);
+        //console.log("task_progress: " + task_progress);
+
+        if (prev_task_state == 'PENDING' && task_state == 'PROGRESS') {
+            $('#loader', business_wrapper).animate({opacity: 1}, 1000);
+        }
+
+        if (task_state == 'PROGRESS') {
+            //$('.progress_bar', business_wrapper).width(task_progress + '%');
+            $('.progress_bar', business_wrapper).animate({width: task_progress + '%'}, 1500);
+            times_checked++;
+            if (times_checked % 3 == 1) {
+                $('.loading_message', business_wrapper).animate({opacity: 0}, 300, function () {
+                    $('.loading_message', business_wrapper).text('Fetching ratings...');
+                    $('.loading_message', business_wrapper).animate({opacity: 1}, 300);
+                });
+            }
+        }
+        else if (task_state == 'SUCCESS' && !task_finished) {
+            $('.progress_bar', business_wrapper).animate({width: task_progress + '%'}, 1500);
             task_finished = true;
             process_ylp_retrieval(business_wrapper, business_id);
         }
+        //console.log("times checked: " + times_checked);
+        prev_task_state = task_state;
     }
 
     var check_fetch_status = function(config, counter){
         if(!task_finished){
             setTimeout(function(){
                 counter++;
-                console.log("check_fetch_status ctr: " + counter);
+                //console.log("check_fetch_status ctr: " + counter);
                 $.ajax(config);
                 check_fetch_status(config, counter);
-            }, 5000);
+            }, 1500);
         }
     }
 
@@ -158,7 +356,10 @@ var process_check_fetch_state = function(business_wrapper, business_id, task_id)
  */
 var process_ylp_retrieval = function(business_wrapper, business_id) {
     var processServerResponse = function(server_response_data, status) {
-        var sparkline_str, sparkline_data, sparkline, ylp_rating
+        var sparkline_str, sparkline_data, sparkline, ylp_rating, ylpline_ratings
+        var business_id
+
+        business_id = $(business_wrapper).data('business_id');
 
         $('.ylp_content', business_wrapper).html(server_response_data);
         sparkline_str = $('.sparkline_content', business_wrapper).text();
@@ -228,8 +429,23 @@ var process_ylp_retrieval = function(business_wrapper, business_id) {
 
         ylp_rating = $('.ylp_rating_span', business_wrapper).text();
         ylp_rating = parseFloat(ylp_rating);
+
+
+        var ylpline_str = $('.ylpline_ratings_data', business_wrapper).text();
+        var ylpline_data = JSON.parse(ylpline_str);
+
+
+        var reviews_str = $('.review_ratings_data', business_wrapper).text();
+        var reviews_data = JSON.parse(reviews_str);
+
+        ylpline_ratings_map[business_id] = ylpline_data;
+        review_ratings_map[business_id] = reviews_data;
+
         change_hue(ylp_rating, business_wrapper);
-        show_business_is_loaded(business_wrapper);
+
+        setTimeout(function(){
+            show_business_is_loaded(business_wrapper);
+        }, 700);
     }
     
     var config = {
@@ -263,18 +479,25 @@ var process_search = function()  {
         $('#submit_button').blur();
 
         $('#footer').animate({opacity: 0}, 500);
-        console.log("hit server");
+        //console.log("hit server");
         //There is at least 1 character. Execute the search.
         var processServerResponse = function(server_response_data, status,
                         jqXHR_ignored)  {
             $('#submit_button').html("<img id='submit_button_image' src=" + HEART_IMG + " width='20' height='20'/>");
-            $('#search_results_container').html(server_response_data);
-            $('#search_results_container').css('display', 'block');
-            scroll_to_results();
-            $('.load_button').click(function() {
+            $('#search_results_container').animate({opacity: 0}, 500, function() {
+                $('#search_results_container').html(server_response_data);
+                $('#search_results_container').css('display', 'block');
+                scroll_to_results();
+                $('#search_results_container').animate({opacity: 1}, 500);
+                $('.load_button').click(function() {
                 load_business($(this));
-             });
-        }
+                 });
+                $('.details_button').click(function() {
+                    var business_wrapper = $(this).closest('.business_wrapper');
+                    toggle_details_section(business_wrapper);
+                });
+            });
+        };
 
         var config = {
           type: "GET",
@@ -367,8 +590,13 @@ var show_business_is_empty = function(business_wrapper) {
  * Show that we're fetching review data for a business.
  *
  * @param business_wrapper DOM element for business
+ * @param is_explicit_fetch Was business explicitly requested to be fetched for?
  */
-var show_business_is_loading = function(business_wrapper) {
+var show_business_is_loading = function(business_wrapper, is_explicit_fetch) {
+    if (is_explicit_fetch) {
+        $('.loading_message', business_wrapper).text('Queued for fetching');
+        $('#loader', business_wrapper).css('opacity', '0');
+    }
     slide_shield_empty_out($('.shield_empty', business_wrapper));
     details_button_hide(business_wrapper);
     $('.ylp_content', business_wrapper).animate({
@@ -451,7 +679,12 @@ var slide_shield_loading_out = function(shield_loading, business_wrapper) {
 var set_up_listeners = function() {
     $("#id_query").keyup(function(event){
         if(event.keyCode == 13){
-            $("#id_location").focus();
+            if (submit_ok) {
+                $("#submit_button").click();
+            }
+            else {
+                $("#id_location").focus();
+            }
         }
         else {
             check_for_valid_input_fields();
@@ -615,14 +848,26 @@ var change_hue = function(rating, business_wrapper) {
  * @param business_wrapper DOM element of a business
  */
 var change_business_hues = function(color, business_wrapper) {
-    $('.ylp_rating_span', business_wrapper).css('background-color', color);
-    $('.business_content', business_wrapper).css('border', '1px solid ' + color);
-    $('.business_name_div', business_wrapper).css('background-color', color);
     $('.shadow', business_wrapper).css('box-shadow', 'inset 0 0 0 6px ' + color);
-    $(business_wrapper).css('border', '1px solid ' + color);
-    $('.business_left', business_wrapper).css({'border-left': '1px solid ' + color, 'border-right': '2px solid ' + color});
-    $('.business_bar', business_wrapper).css({'border-bottom': '1px solid ' + color, 'background-color': color});
-    $('.business_right', business_wrapper).css({'border-bottom': '1px solid ' + color});
+    $('.business_bar', business_wrapper).css('background-color', color);
+    $('.business_name_div', business_wrapper).css('background-color', color);
+    $('.business_left', business_wrapper).css('border-right', '2px solid ' + color);
+    $('.business_general_section', business_wrapper).css('border', '2px' +
+        ' solid ' + color);
+    $('.details_section', business_wrapper).css({
+        'border-left': '2px solid' + color,
+        'border-right': '2px solid' + color,
+        'border-bottom': '2px solid' + color,
+    });
+    $('.ylp_rating_span', business_wrapper).css('background-color', color);
+
+
+    //$('.business_content', business_wrapper).css('border', '1px solid ' +
+    // color);
+
+    //$(business_wrapper).css('border', '1px solid ' + color);
+    //$('.business_right', business_wrapper).css({'border-bottom': '1px solid' +
+    //' ' + color});
 };
 
 /**
