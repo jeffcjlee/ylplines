@@ -40,4 +40,5 @@ class Review(models.Model):
     text = models.TextField(default="")
 
     def __str__(self):
-        return "Review published on %s with a rating of %s" % self.publish_date, self.rating
+        return "Review published on %s with a rating of %s" % (
+            self.publish_date, self.rating)
