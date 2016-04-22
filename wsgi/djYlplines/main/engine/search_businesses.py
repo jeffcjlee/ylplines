@@ -14,9 +14,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Module handles all communication and fetching actions with Yelp."""
+import inspect
 import io
 import json
 import os
+from time import sleep
 
 from lxml.cssselect import CSSSelector
 from lxml.html import fromstring
@@ -28,18 +30,20 @@ from yelp.client import Client
 from yelp.endpoint.search import Search
 from yelp.oauth1_authenticator import Oauth1Authenticator
 
+from main import tasks
+from main.logging import log_exception, log, log_error
 from main.models import Review, Business
 
 # ==== CONSTANTS
+# Name of module for logging purposes.
+MODULE_NAME = 'search_businesses'
 # Yelp only shows 20 reviews per page request.
-#rom main.tasks import enqueue_fetch_reviews
-import main.tasks
 NUM_REVIEWS_PER_PAGE = 20
 # How long since a business' last fetching should we wait before
 # bothering to fetch again.
 DAYS_TO_DELAY_FETCHING = 0
 # The number of max slave thread workers to be allowed to concurrently exist.
-MAX_WORKERS = 10
+MAX_WORKERS = 5
 
 #########################################################
 # Search for businesses when given search query
@@ -55,14 +59,25 @@ def search_for_businesses(query="", location="", debug=False):
     :param: location: Geographical location to search in or near
     :return: A list of Businesses
     """
+    FUNC_NAME = inspect.currentframe().f_code.co_name
+
     if debug:
         location = 'San Francisco'
     elif location == "":
-        print("Error: %s" %
-              "search_for_businesses: No location input provided.")
+        log_error(MODULE_NAME, FUNC_NAME,
+                  'No location input in search')
         return []
 
-    businesses = run_query(query, location)
+    businesses = []
+    log(MODULE_NAME,
+        FUNC_NAME,
+        'query: "%s", location: "%s"' % (query, location))
+
+    try:
+        businesses = run_query(query, location)
+    except Exception as ex:
+        log_exception(MODULE_NAME, FUNC_NAME, ex)
+
     # First 10 entries. No pagination yet so KISS.
     businesses = businesses[:10]
     for cur_business in businesses:
@@ -91,26 +106,35 @@ def save_business(id, name, image_url, url, review_count, rating):
     :param: review_count: Number of reviews for the business on Yelp
     :param: rating: Yelp review rating of business
     """
+    FUNC_NAME = inspect.currentframe().f_code.co_name
+
     q_delim_index = url.find('?')
     url = url[:q_delim_index]  # Strip GET parameters
 
     # Update existing business in database
-    if Business.objects.filter(id=id).exists():
-        business = Business.objects.get(id=id)
-        business.name = name
-        business.image_url = image_url
-        business.url = url
-        business.review_count = review_count
-        business.rating = rating
-    # Save new business
-    else:
-        business = Business(id=id,
-                            name=name,
-                            image_url=image_url,
-                            url=url,
-                            review_count=review_count,
-                            rating=rating)
-    business.save()
+    try:
+        if Business.objects.filter(id=id).exists():
+            business = Business.objects.get(id=id)
+            business.name = name
+            business.image_url = image_url
+            business.url = url
+            business.review_count = review_count
+            business.rating = rating
+            log(MODULE_NAME, FUNC_NAME, 'Updating business to db: %s' %
+                business.id)
+        # Save new business
+        else:
+            business = Business(id=id,
+                                name=name,
+                                image_url=image_url,
+                                url=url,
+                                review_count=review_count,
+                                rating=rating)
+            log(MODULE_NAME, FUNC_NAME, 'Creating new business to db: %s' % (
+                business.id))
+        business.save()
+    except Exception as ex:
+        log_exception(MODULE_NAME, FUNC_NAME, ex)
 
 
 def run_query(query, location):
@@ -121,18 +145,27 @@ def run_query(query, location):
     :param: location: Geographical location to search for
     :return: A list of Businesses
     """
+    FUNC_NAME = inspect.currentframe().f_code.co_name
+
     if location == "":
-        print("Error: %s" % "run_query: No location input provided.")
+        log_error(MODULE_NAME, FUNC_NAME, 'No location input provided.')
         return []
 
     client = get_yelp_api_client()
+    if not client:
+        return []
+
     # Yelp takes search term query in params kwargs,
     # and location directly as a param in search fxn.
     params = {
         'term': query,
     }
-    search = Search(client)
-    response = search.search(location, **params)
+
+    try:
+        search = Search(client)
+        response = search.search(location, **params)
+    except Exception as ex:
+        log_exception(MODULE_NAME, FUNC_NAME, ex)
 
     businesses = response.businesses
     if not businesses:
@@ -162,21 +195,27 @@ def get_yelp_api_client():
     :return: Yelp API client
     :rtype: Yelp Client
     """
-    if 'OPENSHIFT_REPO_DIR' in os.environ or 'TRAVIS' in os.environ:
-        auth = Oauth1Authenticator(
-            consumer_key=os.environ['YELP_CONSUMER_KEY'],
-            consumer_secret=os.environ['YELP_CONSUMER_SECRET'],
-            token=os.environ['YELP_TOKEN'],
-            token_secret=os.environ['YELP_TOKEN_SECRET']
-        )
-    else:
-        file_path = get_yelp_api_keys_filepath()
+    FUNC_NAME = inspect.currentframe().f_code.co_name
 
-        with io.open(file_path, 'r') as cred:
-            creds = json.load(cred)
-            auth = Oauth1Authenticator(**creds)
+    try:
+        if 'OPENSHIFT_REPO_DIR' in os.environ or 'TRAVIS' in os.environ:
+            auth = Oauth1Authenticator(
+                consumer_key=os.environ['YELP_CONSUMER_KEY'],
+                consumer_secret=os.environ['YELP_CONSUMER_SECRET'],
+                token=os.environ['YELP_TOKEN'],
+                token_secret=os.environ['YELP_TOKEN_SECRET']
+            )
+        else:
+            file_path = get_yelp_api_keys_filepath()
 
-    client = Client(auth)
+            with io.open(file_path, 'r') as cred:
+                creds = json.load(cred)
+                auth = Oauth1Authenticator(**creds)
+
+        client = Client(auth)
+    except Exception as ex:
+        log_exception(MODULE_NAME, FUNC_NAME, ex)
+
     return client
 
 
@@ -248,7 +287,7 @@ def parse_results_in_background(session, response):
     response.data = [ids, ratings, publish_dates]  # ,texts]
 
 
-def get_business_reviews(business, num_reviews=0, debug=False):
+def get_business_reviews(business, num_reviews=0, task=None, debug=False):
     """
     Fetches business reviews for a single business and saves it to the database.
 
@@ -272,10 +311,19 @@ def get_business_reviews(business, num_reviews=0, debug=False):
     :param debug: Debug mode is on if True.
     :return: Nothing. Reviews are saved into the database.
     """
+    FUNC_NAME = inspect.currentframe().f_code.co_name
+    do_not_store_latest_pull = False
+    print("task is: " + str(type(task)) + " " + str(task))
     if debug:
         business = Business.objects.get(id='girl-and-the-goat-chicago')
     if not business:
         return
+
+    """
+    if task:
+        fake_fetch(task)
+        return
+    """
 
     latest_review_date = None
     todays_date = datetime.today().date()
@@ -284,6 +332,8 @@ def get_business_reviews(business, num_reviews=0, debug=False):
     if business.latest_review_pull and business.latest_review_pull + \
             timedelta(days=DAYS_TO_DELAY_FETCHING) >= todays_date:
         print("Hitting too recent to fetch")
+        log(MODULE_NAME, FUNC_NAME, '%s | Hitting too recent to fetch' %
+            business.id)
         return
 
     if Review.objects.filter(business_id=business.id).exists():
@@ -297,8 +347,7 @@ def get_business_reviews(business, num_reviews=0, debug=False):
     if num_reviews % NUM_REVIEWS_PER_PAGE != 0:
         num_requests += 1
 
-    print("Concurrent pull start")
-
+    log(MODULE_NAME, FUNC_NAME, '%s | Concurrent pull start' % business.id)
     concurrency_pull_start = default_timer()
     urls = create_urls_list(business.url, num_reviews)
     session = FuturesSession(max_workers=MAX_WORKERS)
@@ -316,14 +365,16 @@ def get_business_reviews(business, num_reviews=0, debug=False):
     for i, future in enumerate(futures, 1):
         response = future.result()
         responses.append(response)
+        progress = round(i * 90 / futures.__len__(), 1)
+        if task:
+            task.update_state(state='PROGRESS', meta={'current': progress})
         print(str(i) + ": " + str(response.status_code) + " " + str(response.reason) + '...', end="", flush=True)
 
     concurrency_pull_end = default_timer()
-    print("Concurrent pull end.")
-    print('Concurrency pull duration: %s seconds' % str(concurrency_pull_end-concurrency_pull_start))
-
+    log(MODULE_NAME, FUNC_NAME, '%s | Concurrent pull end. Duration: %s '
+                                'seconds' % (business.id, str(concurrency_pull_end-concurrency_pull_start)))
     # Save reviews to database
-    print('Begin response processing')
+    log(MODULE_NAME, FUNC_NAME, '%s | Begin response processing' % business.id)
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
 
     process_start = default_timer()
@@ -333,14 +384,36 @@ def get_business_reviews(business, num_reviews=0, debug=False):
             if response.status_code == 200:
                 save_reviews(response, business, latest_review_date)
             else:
-                print("Error: retrieval unsuccessful, got a status code of: "
-                      "" + str(response.status_code))
+                do_not_store_latest_pull = True
+                log_error(MODULE_NAME, FUNC_NAME, 'Fetch unsuccessful. Got an HTTP status code of: %s'
+                          % str(response.status_code))
+        progress = 90 + (round(i * 10 / responses.__len__(), 1))
+        if task:
+            task.update_state(state='PROGRESS', meta={'current': progress})
     process_end = default_timer()
-    print('\nResponse processing duration: %s seconds' % str(process_end-process_start))
+    log(MODULE_NAME, FUNC_NAME, '\nProcessing response duration: %s seconds'
+        % str(process_end-process_start))
 
     # Update business that we fetched reviews today
-    business.latest_review_pull = todays_date
-    business.save()
+    if not do_not_store_latest_pull:
+        business.latest_review_pull = todays_date
+        business.save()
+
+
+def fake_fetch(task=None):
+    TOTAL = 10
+    print("in fake fetch!")
+    for i in range(1, TOTAL):
+        sleep(1)
+        progress = i*90//TOTAL
+        if task:
+            task.update_state(state='PROGRESS', meta={'current': progress})
+
+    for i in range(1, TOTAL):
+        sleep(0.1)
+        progress = 90 + (i*10//TOTAL)
+        if task:
+            task.update_state(state='PROGRESS', meta={'current': progress})
 
 
 def create_urls_list(business_url, num_reviews):
@@ -379,24 +452,27 @@ def save_reviews(response, business, latest_review_date):
     publish_dates = response.data[2]
     #texts = response.data[3]
 
-    for id, rating, publish_date in zip(ids, ratings, publish_dates):
-        # Don't bother to save if the review already exists in db.
-        if not Review.objects.filter(id=id).exists():
-            # Quit out if the publish date is older than the last fetch date
-            # since everything in the loop now will be older than the last
-            # fetch date.
-            if latest_review_date is not None and publish_date < latest_review_date:
-                continue
-            review = Review(id=id, business=business, rating=rating, publish_date=publish_date)
-            review.save()
+    try:
+        for id, rating, publish_date in zip(ids, ratings, publish_dates):
+            # Don't bother to save if the review already exists in db.
+            if not Review.objects.filter(id=id).exists():
+                # Quit out if the publish date is older than the last fetch date
+                # since everything in the loop now will be older than the last
+                # fetch date.
+                if latest_review_date is not None and publish_date < latest_review_date:
+                    continue
+                review = Review(id=id, business=business, rating=rating, publish_date=publish_date)
+                review.save()
 
-    # Save for in case we want to store text
-    # for id, rating, publish_date, text in zip(ids, ratings, publish_dates, texts):
-    #     if not Review.objects.filter(id=id).exists():
-    #         if latest_review_date is not None and publish_date < latest_review_date:
-    #             continue
-    #         review = Review(id=id, business=business, rating=rating, publish_date=publish_date, text=text)
-    #         review.save()
+        # Save for in case we want to store text
+        # for id, rating, publish_date, text in zip(ids, ratings, publish_dates, texts):
+        #     if not Review.objects.filter(id=id).exists():
+        #         if latest_review_date is not None and publish_date < latest_review_date:
+        #             continue
+        #         review = Review(id=id, business=business, rating=rating, publish_date=publish_date, text=text)
+        #         review.save()
+    except Exception as ex:
+        log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
 
 
 def update_business_reviews(business, debug=False):
@@ -414,18 +490,17 @@ def update_business_reviews(business, debug=False):
     num_reviews_in_db = Review.objects.filter(business=business).count()
     num_reviews_diff = num_reviews_in_business - num_reviews_in_db
 
-    print("num_reviews_in_business: " + str(num_reviews_in_business))
-    print("num_reviews_in_db: " + str(num_reviews_in_db))
-    print("num_reviews_diff: " + str(num_reviews_diff))
-
+    log(MODULE_NAME, inspect.currentframe().f_code.co_name, '%s | # reviews: '
+                                                            '%s, # in db: %s, difference of: %s' %
+        (business.id, str(num_reviews_in_business), str(num_reviews_in_db), str(num_reviews_diff)))
     if num_reviews_diff > 0:
         if num_reviews_diff <= 100:
-            #get a num of pages worth of reviews for business, no queueing
+            # get a num of pages worth of reviews for business, no queueing
             get_business_reviews(business, num_reviews_diff)
         else:
             # enqueue to update a business with a num of pages worth of
             # reviews, queue
-            main.tasks.enqueue_fetch_reviews(business, num_reviews_diff)
+            tasks.enqueue_fetch_reviews.delay(business.id, num_reviews_diff)
 
 
 
