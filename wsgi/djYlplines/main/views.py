@@ -125,8 +125,8 @@ def check_fetch_state_with_ajax(request):
                 task_progress = task_result.info['current']
             elif task_state == 'SUCCESS':
                 task_progress = 100
-            #print("TASK PROGRESS: " + str(task_progress))
-            #print("TASK STATE: " + task_state)
+            print("TASK PROGRESS: " + str(task_progress))
+            print("TASK STATE: " + task_state)
             context = {
                 'task_state': '%s^%s' % (str(task_state), str(task_progress)),
             }
