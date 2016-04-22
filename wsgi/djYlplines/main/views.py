@@ -121,7 +121,7 @@ def check_fetch_state_with_ajax(request):
             task_result = tasks.enqueue_fetch_reviews.AsyncResult(task_id)
             task_state = task_result.state
             task_progress = 0
-            if type(task_result.info) == dict:
+            if type(task_result.info) == dict and 'current' in task_result.info:
                 task_progress = task_result.info['current']
             elif task_state == 'SUCCESS':
                 task_progress = 100
