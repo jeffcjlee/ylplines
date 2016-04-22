@@ -297,8 +297,8 @@ var process_check_fetch_state = function(business_wrapper, business_id, task_id)
             task_progress = 100;
         }
 
-        //console.log("task_state: " + task_state);
-        //console.log("task_progress: " + task_progress);
+        console.log("task_state: " + task_state);
+        console.log("task_progress: " + task_progress);
 
         if (prev_task_state == 'PENDING' && task_state == 'PROGRESS') {
             $('#loader', business_wrapper).animate({opacity: 1}, 1000);
@@ -328,7 +328,7 @@ var process_check_fetch_state = function(business_wrapper, business_id, task_id)
         if(!task_finished){
             setTimeout(function(){
                 counter++;
-                //console.log("check_fetch_status ctr: " + counter);
+                console.log("check_fetch_status ctr: " + counter);
                 $.ajax(config);
                 check_fetch_status(config, counter);
             }, 1500);

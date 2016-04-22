@@ -5,4 +5,4 @@ cd wsgi
 cd djYlplines
 rm worker1.pid
 celery multi stop worker1
-celery multi start worker1 -A djYlplines
+celery multi start worker1 -A djYlplines -c 1
