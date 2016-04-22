@@ -14,127 +14,122 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Views handler for 'main' Django application"""
-from django.db.models import Avg
-from django.shortcuts import render, get_object_or_404, render_to_response
+import inspect
 
-from djYlplines.celery import app
+from django.shortcuts import render, render_to_response
+
 from main.engine.smoothing import get_review_graph_data
-from main.models import Business, Review
+from main.logging import log_exception
+from main.models import Business
 from main.forms import FrontSearchForm
-from main.engine.search_businesses import search_for_businesses, \
-    get_business_reviews, update_business_reviews
+from main.engine.search_businesses import search_for_businesses, update_business_reviews
 from main import tasks
 
+MODULE_NAME = 'main.views'
 
 def index(request):
     """Renders front page of website"""
-    if 'query' in request.GET:
-        form = FrontSearchForm(request.GET)
-        if form.is_valid():
-            print("form found valid")
-            query = form.cleaned_data['query']
-            location = form.cleaned_data['location']
-            businesses = search_for_businesses(query, location)
-            context = {
-                'businesses': businesses,
-                'form': form,
-            }
-            return render(request, 'main/index.html', context)
+    try:
+        if 'query' in request.GET:
+            form = FrontSearchForm(request.GET)
+            if form.is_valid():
+                query = form.cleaned_data['query']
+                location = form.cleaned_data['location']
+                businesses = search_for_businesses(query, location)
+                context = {
+                    'businesses': businesses,
+                    'form': form,
+                }
+                return render(request, 'main/index.html', context)
+            else:
+                form = FrontSearchForm()
         else:
             form = FrontSearchForm()
-    else:
-        form = FrontSearchForm()
-    return render(request, 'main/index.html', {'form': form})
+        return render(request, 'main/index.html', {'form': form})
+    except Exception as ex:
+        log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
 
 
 def search_with_ajax(request):
     """Handles ajax request when user searches"""
-    if 'query' in request.GET and 'location' in request.GET:
-        form = FrontSearchForm(request.GET)
-        if form.is_valid():
-            print("form found valid from ajax")
-            query = form.cleaned_data['query']
-            location = form.cleaned_data['location']
-            businesses = search_for_businesses(query, location)
-            context = {
-                'businesses': businesses,
-                'form': form,
-            }
-            return render_to_response("main/search_results_snippet.html",
-                                      context)
-        else:
-            form = FrontSearchForm()
-            return render_to_response("main/search_results_snippet.html", {'form': form})
-    return render_to_response("main/search_results_snippet.html")
+    try:
+        if 'query' in request.GET and 'location' in request.GET:
+            form = FrontSearchForm(request.GET)
+            if form.is_valid():
+                query = form.cleaned_data['query']
+                location = form.cleaned_data['location']
+                businesses = search_for_businesses(query, location)
+                context = {
+                    'businesses': businesses,
+                    'form': form,
+                }
+                return render_to_response("main/search_results_snippet.html",
+                                          context)
+            else:
+                form = FrontSearchForm()
+                return render_to_response("main/search_results_snippet.html", {'form': form})
+        return render_to_response("main/search_results_snippet.html")
+    except Exception as ex:
+        log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
 
 
 def retrieve_ylp_with_ajax(request):
     """Handles ajax request to fetch reviews for a business from the db"""
-    if 'business_id' in request.GET:
-        business_id = request.GET.get('business_id')
-        business = Business.objects.get(id=business_id)
+    try:
+        if 'business_id' in request.GET:
+            business_id = request.GET.get('business_id')
+            business = Business.objects.get(id=business_id)
 
-        update_business_reviews(business)
+            update_business_reviews(business)
 
-        ylpline_ratings, review_ratings, smooth_rating, sparkline, sparkline_6mo, sparkline_12mo, sparkline_24mo = get_review_graph_data(business)
-        context = {
-            'sparkline': sparkline,
-            'sparkline_6mo': sparkline_6mo,
-            'sparkline_12mo': sparkline_12mo,
-            'sparkline_24mo': sparkline_24mo,
-            'smooth_rating': smooth_rating,
-        }
-    return render_to_response("main/retrieve_ylp_snippet.html", context)
+            ylpline_ratings, review_ratings, smooth_rating, sparkline, sparkline_6mo, sparkline_12mo, sparkline_24mo = get_review_graph_data(business)
+            context = {
+                'sparkline': sparkline,
+                'sparkline_6mo': sparkline_6mo,
+                'sparkline_12mo': sparkline_12mo,
+                'sparkline_24mo': sparkline_24mo,
+                'smooth_rating': smooth_rating,
+                'ylpline_ratings': ylpline_ratings,
+                'review_ratings': review_ratings,
+            }
+        return render_to_response("main/retrieve_ylp_snippet.html", context)
+    except Exception as ex:
+        log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
 
 
 def enqueue_fetch_reviews_with_ajax(request):
     """Handles ajax request to enqueue task to fetch reviews from Yelp"""
-    if 'business_id' in request.GET:
-        business_id = request.GET.get('business_id')
-        task_result = tasks.enqueue_fetch_reviews.delay(business_id)
-        #print(type(task_result))
-        task_id = task_result.id
-        #print(type(task_id))
-        print("Task ID: " + str(task_id))
-        #print(type(task_result.state))
-        print("Task State: " + str(task_result.state))
-        #task_state = task.state
-        context = {
-            'task_id': task_id,
-        #    'task_state': task_state,
-        }
-    return render_to_response("main/task_id_snippet.html",
-                              context)
+    try:
+        if 'business_id' in request.GET:
+            business_id = request.GET.get('business_id')
+            task_result = tasks.enqueue_fetch_reviews.delay(business_id)
+            task_id = task_result.id
+            context = {
+                'task_id': task_id,
+            }
+        return render_to_response("main/task_id_snippet.html",
+                                  context)
+    except Exception as ex:
+        log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
+
 
 def check_fetch_state_with_ajax(request):
-    if 'task_id' in request.GET:
-        task_id = request.GET.get('task_id').rstrip()
-        print("check: " + str(task_id))
-        task_result = tasks.enqueue_fetch_reviews.AsyncResult(task_id)
-        print("task result: " + str(task_result))
-        print("result: " + str(task_result.result))
-        print(str(task_result.state))
-        task_state = task_result.state
-        context = {
-            'task_state': task_state,
-        }
-    return render_to_response("main/task_state_snippet.html", context)
-
-
-def business(request, business_id):
-    """Renders the business details page"""
-    business = get_object_or_404(Business, id=business_id)
-    get_business_reviews(business)
-    reviews = Review.objects.filter(business=business).order_by('publish_date')
-    ylpline_ratings, review_ratings, current_ylpline_rating, sparklines, sparklines_6mo, sparklines_12_mo, sparklines_24mo = get_review_graph_data(business)
-    review_count = reviews.count()
-    review_average = round(reviews.aggregate(Avg('rating'))['rating__avg'], 2)
-    context = {'reviews': reviews,
-               'review_count': review_count,
-               'review_average': review_average,
-               'current_ylpline_rating': current_ylpline_rating,
-               'ylpline_ratings': ylpline_ratings,
-               'review_ratings': review_ratings,
-               }
-
-    return render(request, 'main/business.html', context)
+    """Handles ajax request to poll server on the status of a task"""
+    try:
+        if 'task_id' in request.GET:
+            task_id = request.GET.get('task_id').rstrip()
+            task_result = tasks.enqueue_fetch_reviews.AsyncResult(task_id)
+            task_state = task_result.state
+            task_progress = 0
+            if type(task_result.info) == dict:
+                task_progress = task_result.info['current']
+            elif task_state == 'SUCCESS':
+                task_progress = 100
+            #print("TASK PROGRESS: " + str(task_progress))
+            #print("TASK STATE: " + task_state)
+            context = {
+                'task_state': '%s^%s' % (str(task_state), str(task_progress)),
+            }
+        return render_to_response("main/task_state_snippet.html", context)
+    except Exception as ex:
+        log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
