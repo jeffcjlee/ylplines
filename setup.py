@@ -43,6 +43,7 @@ setup(
         'amqp',
         'anyjson',
         'billiard',
+        'newrelic',
     ],
     dependency_links=[
         'https://pypi.python.org/simple/django/'
