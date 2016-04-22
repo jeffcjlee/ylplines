@@ -22,3 +22,5 @@ If this process succeeds, then the changes have been automatically
 applied. Otherwise it may be necessary to manually apply the
 changes. If the base package has changed enough, you may need to
 re-audit the base code and generate a new patch file.
+
+Force
