@@ -313,7 +313,7 @@ def get_business_reviews(business, num_reviews=0, task=None, debug=False):
     """
     FUNC_NAME = inspect.currentframe().f_code.co_name
     do_not_store_latest_pull = False
-    print("task is: " + str(type(task)) + " " + str(task))
+    print("task for " + business.id + " is: " + str(task))
     if debug:
         business = Business.objects.get(id='girl-and-the-goat-chicago')
     if not business:
@@ -389,6 +389,7 @@ def get_business_reviews(business, num_reviews=0, task=None, debug=False):
                           % str(response.status_code))
         progress = 90 + (round(i * 10 / responses.__len__(), 1))
         if task:
+            print("theres a task!")
             task.update_state(state='PROGRESS', meta={'current': progress})
     process_end = default_timer()
     log(MODULE_NAME, FUNC_NAME, '\nProcessing response duration: %s seconds'

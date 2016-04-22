@@ -30,7 +30,7 @@ MODULE_NAME = 'tasks'
 @shared_task(bind=True)
 def enqueue_fetch_reviews(self, business_id, num_reviews=0):
     """Fetch business reviews for a specific business"""
-
+    print('self task for ' + business_id + ' is: ' + str(self))
     if Business.objects.filter(id=business_id).exists():
         business = Business.objects.get(id=business_id)
         main.engine.search_businesses.get_business_reviews(business,
