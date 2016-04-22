@@ -289,15 +289,12 @@ input[type="text"].form_value{
 }
 
 .business_wrapper {
-    border: 1px solid #e2e2e2;
-    height: 100px;
     margin: 10px auto;
-    display: flex;
+    display: block;
 
 }
 
 .business_image_div {
-	border: 0px solid black;
 	float: left;
     width: 10%;
     height: 100%;
@@ -311,8 +308,7 @@ input[type="text"].form_value{
     box-shadow: inset 0px 0px 0 6px #e2e2e2;
     top: 0;
     left: 0;
-	border: 0px solid black;
-    transition: box-shadow 1s;
+    transition: box-shadow 2s;
 }
 
 .business_image {
@@ -321,21 +317,18 @@ input[type="text"].form_value{
 }
 
 .business_content {
-    border: 1px solid #e2e2e2;
-    border-bottom: 1px solid #e2e2e2;
     float: left;
     width: 90%;
-    transition: border 1s;
+	height: 100%;
+    transition: border 2s;
 }
 
 .business_bar {
     display: flex;
-    border: 0px solid black;
-	height:35px;
+	height: 35%;
     border-left: 0px;
     background-color: #e2e2e2;
-    transition: background-color 1s;
-    border-bottom: 1px solid #e2e2e2;
+    transition: background-color 2s;
 }
 
 .business_name_div {
@@ -343,7 +336,7 @@ input[type="text"].form_value{
     width: 92%;
     padding: 5px 10px 0px 3px;
 	background-color: #e2e2e2;
-    transition: background-color 1s;
+    transition: background-color 2s;
 }
 
 .business_name {
@@ -395,21 +388,19 @@ input[type="text"].form_value{
 
 .business_info {
     display: flex;
-	height: 63px;
-	border: 0px solid blue;
+	position: relative;
+	height: 65%;
 }
 
 .business_left {
     font-weight: 300;
     border-right: 2px solid #e2e2e2;
-    border-left: 1px solid #e2e2e2;
     width: 40%;
     padding-left: 10px;
-    transition: border-right 1s, border-left 1s;
+    transition: border-right 2s;
 }
 
 .business_location_div {
-    border: 0px solid lightcoral;
 	float: left;
 	padding: 3px 0;
 }
@@ -434,20 +425,17 @@ input[type="text"].form_value{
 }
 
 .business_yelp_rating {
-    border: 0px solid lightgoldenrodyellow;
 	float: right;
     padding: 10px 30px 0 0;
 }
 
 .business_right {
-    border: 0px solid green;
-    border-bottom: 1px solid #e2e2e2;
     width: 60%;
 	position: relative;
     display: flex;
     overflow: hidden;
 	background-color: #e5fdff;
-    transition: border-bottom 1s;
+    transition: border-bottom 2s;
 }
 
 .shield {
@@ -473,7 +461,7 @@ input[type="text"].form_value{
 .load_button {
 	display: block;
 	margin: 0 auto;
-	padding: 0 0 2px;;
+	padding: 0 0 2px;
 	border-radius: 4px;
 	border: 1px solid #767676;
 	background-color: #FFFFFF;
@@ -500,22 +488,33 @@ input[type="text"].form_value{
     z-index: 2;
 }
 
+.progress_bar {
+	background-color: #0565eb;
+    position: absolute;
+    width: 0%;
+    height: 100%;
+    z-index: 3;
+}
+
 .loader_image {
-	border: 0px solid black;
-	margin-top: 12px;
-	margin-left: 120px;
-	display: flex;
-	float: left;
+	margin-top: 15px;
+	margin-left: 150px;
+    height: 20px;
+    width: 20px;
+    position: absolute;
+	display: block;
 }
 
 .loading_message {
-	border: 0px solid black;
-	margin-left: 15px;
-	margin-top: 15px;
-	display: flex;
+	margin-left: 180px;
+	margin-top: 17px;
+	display: block;
 	float: left;
 	color: white;
-    font-family: 'Roboto', sans-serif;
+    font-size: 0.9em;
+	font-family: 'Roboto', sans-serif;
+	font-weight: 200;
+	position: absolute;
 }
 
 .shield_text_div {
@@ -523,6 +522,7 @@ input[type="text"].form_value{
     padding: 5px;
     margin: 0 auto;
     text-align: center;
+    z-index: 4;
 }
 
 .empty_shield_text_div {
@@ -532,8 +532,6 @@ input[type="text"].form_value{
 	font-weight: 200;
 }
 
-.loading_shield_text_div {
-}
 
 .ylp_content {
 	display: flex;
@@ -544,7 +542,6 @@ input[type="text"].form_value{
 
 .sparkline_div {
     width: 40%;
-    border: 0px solid lightpink;
 }
 
 .highcharts-container {
@@ -561,7 +558,6 @@ input[type="text"].form_value{
 
 .trend_div {
     width: 40%;
-    border: 0px solid lightskyblue;
 }
 
 div.sparkline_title, div.trend_title {
@@ -603,7 +599,6 @@ span.sparkline_title {
 
 .ylp_rating {
     width: 20%;
-    border: 0px solid black;
 	text-align: center;
 	margin: 0 auto;
 }
@@ -618,7 +613,6 @@ span.sparkline_title {
 
 .ylp_rating_content {
 	margin-top: 15px;
-	border: 0px solid black;
 	height: 100%;
 	width: 100%;
 }
@@ -636,11 +630,42 @@ span.sparkline_title {
 	padding: 2px 5px 2px 5px;
 }
 
+.business_general_section {
+    height: 100px;
+    width: 100%;
+	border: 2px solid #e2e2e2;
+	display: flex;
+	transition: border 2s;
+}
 
+.details_section {
+    border-left: 2px solid #e2e2e2;
+    border-right: 2px solid #e2e2e2;
+    border-bottom: 2px solid #e2e2e2;
+    height: 0px;
+    width: 100%;
+    overflow: hidden;
+    transition: border 2s, border-bottom-width 1s;
+}
+
+.detail_graph_data {
+    display: none;
+}
+
+.details_graph {
+    height: 300px;
+}
 /* Business */
 svg > text {
     display: none;
 }
+
+
+
+
+
+
+
 
 
 
