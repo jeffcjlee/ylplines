@@ -76,16 +76,6 @@
     </div>
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
    <script language="javascript">
-      /*
-         Before our JavaScript can be imported, the following JavaScript
-         variables need to be set from Django variables. While these
-         values could be hard-coded into the JavaScript, this allows
-         them to be centrally located.
-      */
-      //From color_liker.views.MIN_SEARCH_CHARS
-      //var MIN_SEARCH_CHARS = {# MIN_SEARCH_CHARS #};
-
-      //The url to submit the search form. From color_liker.urls
       var SEARCH_URL = "{% url 'main:search' %}";
       var RETRIEVE_YLP_URL = "{% url 'main:retrieve_ylp' %}"
       var ENQUEUE_FETCH_URL = "{% url 'main:enqueue_fetch' %}"
@@ -94,13 +84,13 @@
       var SEARCH_IMG = "{% static "main/images/search.svg" %}";
       var HEART_IMG = "{% static "main/images/heart.svg" %}";
       var business_count = {{ businesses|length }};
-      //var skip_hero = {#  skip_hero #}
     </script>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/ScrollMagic.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ScrollMagic/2.0.5/plugins/debug.addIndicators.js"></script>
     <script src="{% static 'main/jQueryRotate.js' %}"></script>
     <script src="http://code.highcharts.com/stock/highstock.js"></script>
+    <script src="{% static 'main/highcharts-regression.js' %}"></script>
     <script src="{% static 'main/script.js' %}"></script>
 
 
