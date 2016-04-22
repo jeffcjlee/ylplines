@@ -20,7 +20,6 @@ from main import views
 
 urlpatterns = [
     url(r'^/?$', views.index, name='index'),
-    url(r'^business/(?P<business_id>.+)/$', views.business, name='business'),
     url(r'^search/$', "main.views.search_with_ajax", name="search"),
     url(r'^retrieve_ylp/$', "main.views.retrieve_ylp_with_ajax", name="retrieve_ylp"),
     url(r'^enqueue_fetch/$', "main.views.enqueue_fetch_reviews_with_ajax",
