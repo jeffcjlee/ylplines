@@ -300,7 +300,7 @@ var process_check_fetch_state = function(business_wrapper, business_id, task_id)
         console.log("task_state: " + task_state);
         console.log("task_progress: " + task_progress);
 
-        if (prev_task_state == 'PENDING' && task_state == 'PROGRESS') {
+        if ((prev_task_state == 'PENDING' || prev_task_state == 'STARTED') && task_state == 'PROGRESS') {
             $('#loader', business_wrapper).animate({opacity: 1}, 1000);
         }
 
