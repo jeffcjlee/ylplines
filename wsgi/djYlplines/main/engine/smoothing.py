@@ -14,12 +14,17 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 """Review smoothing algorithms to find ylp rating"""
+import inspect
 from datetime import datetime, timedelta
 
+from main.logging import log_error
 from main.models import Review, Business
 
+# Logging purposes
+MODULE_NAME = 'smoothing'
 # Smoothing factor to be used with finding the ylp rating
 SMOOTH_FACTOR = 0.2
+
 
 def get_review_graph_data(business, debug=False):
     """
@@ -31,16 +36,19 @@ def get_review_graph_data(business, debug=False):
     Yelp review ratings, the overall smoothed rating, recent trend sparkline,
     6-month sparkline, 12-month sparkline, and 24-month sparkline.
     """
+    FUNC_NAME = inspect.currentframe().f_code.co_name
+
     if debug:
         business = Business.objects.filter(id='whitewater-excitement-lotus-2')
     elif not business:
-        print("Error: %s" % "get_review_graph_data: No business provided.")
+        log_error(MODULE_NAME, FUNC_NAME, '%s | No business input provided' %
+                  business.id)
         return
 
     reviews = Review.objects.filter(business=business).order_by('publish_date')
 
-    ylpline_ratings = []
-    review_ratings = []
+    ylpline_ratings = [] # Detail graph - ylpline ratings
+    review_ratings = []  # Detail graph - review ratings
     review = reviews[0]
     publish_date = review.publish_date
     actual_rating = float(review.rating)
@@ -73,6 +81,7 @@ def get_review_graph_data(business, debug=False):
     three_24mo_units_ago = two_24mo_units_ago - timedelta(days=183)
     four_24mo_units_ago = three_24mo_units_ago - timedelta(days=183)
 
+    # Graph takes x-axis time in seconds since epoch
     publish_datetime = datetime(publish_date.year, publish_date.month, publish_date.day)
     epoch = datetime(1970, 1, 1)
     publish_since_epoch = (publish_datetime - epoch).total_seconds() * 1000
@@ -102,6 +111,8 @@ def get_review_graph_data(business, debug=False):
     three_24mo_units_back = []
     four_24mo_units_back = []
 
+    # Completed index 0 review before this loop. Now repeat the algorithm over
+    # the collection of reviews.
     for review in reviews[1:]:
         publish_date = review.publish_date
         publish_datetime = datetime(publish_date.year, publish_date.month, publish_date.day)
@@ -148,7 +159,7 @@ def get_review_graph_data(business, debug=False):
         elif publish_date > four_24mo_units_ago:
             four_24mo_units_back.append(smooth_rating)
 
-        ylpline_ratings.append([publish_since_epoch, smooth_rating])
+        ylpline_ratings.append([publish_since_epoch, round(smooth_rating, 2)])
         review_ratings.append([publish_since_epoch, actual_rating])
 
         prev_smooth_rating = smooth_rating
@@ -158,10 +169,6 @@ def get_review_graph_data(business, debug=False):
     sparkline_12mo = get_sparkline([four_12mo_units_back, three_12mo_units_back, two_12mo_units_back, one_12mo_unit_back])
     sparkline_24mo = get_sparkline([four_24mo_units_back, three_24mo_units_back, two_24mo_units_back, one_24mo_unit_back])
 
-    print(str(sparkline))
-    print(str(sparkline_6mo))
-    print(str(sparkline_12mo))
-    print(str(sparkline_24mo))
     return ylpline_ratings, review_ratings, smooth_rating, sparkline, sparkline_6mo, sparkline_12mo, sparkline_24mo
 
 
