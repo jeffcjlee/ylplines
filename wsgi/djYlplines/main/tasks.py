@@ -16,30 +16,26 @@
 """Async queue tasks for the main app"""
 from __future__ import absolute_import
 
+import inspect
+
 from celery import shared_task
 
 import main.engine.search_businesses
-#from main.engine.search_businesses import get_business_reviews
+from main.logging import log_error
 from main.models import Business
 
+MODULE_NAME = 'tasks'
 
-@shared_task
-def enqueue_fetch_reviews(business_id, num_reviews=0):
-    business = Business.objects.get(id=business_id)
-    main.engine.search_businesses.get_business_reviews(business, num_reviews)
+
+@shared_task(bind=True)
+def enqueue_fetch_reviews(self, business_id, num_reviews=0):
+    """Fetch business reviews for a specific business"""
+
+    if Business.objects.filter(id=business_id).exists():
+        business = Business.objects.get(id=business_id)
+        main.engine.search_businesses.get_business_reviews(business,
+                                                           num_reviews, self)
+    else:
+        log_error(MODULE_NAME, inspect.current_frame().f_code.co_name,
+                  '%s | This business does not exists.' % business_id)
     return True
-
-
-@shared_task
-def add(x, y):
-    return x + y
-
-
-@shared_task
-def mul(x, y):
-    return x * y
-
-
-@shared_task
-def xsum(numbers):
-    return sum(numbers)
