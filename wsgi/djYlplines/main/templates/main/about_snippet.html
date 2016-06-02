@@ -1,0 +1,146 @@
+{% load staticfiles %}
+
+<div class="about_wrapper">
+    <h1 id="headline">All About Ylplines</h1>
+
+    <br>
+
+    <h2>What Is It</h2>
+
+    <p>
+        <a href="/">Ylplines</a> seeks to visualize the timeline of Yelp ratings
+          for the
+    businesses we have visited and also businesses we're looking to visit.
+    Along the way, why not come up with a more precise rating for
+    businesses, as well? Coupling these goals, ylplines serves to amuse and
+    enlighten us on how has a business performed over the years.
+    </p>
+
+    <p>
+    Check out the short-term and long-term trends of a particular business.
+    It's pretty fun to look up your favorite places and see how it's fared
+    over the years.
+    </p>
+
+    <p>
+    Ylplines communicates directly with <a href="http://yelp.com"
+                                           target="_blank">Yelp</a> and
+        its
+    <a href="https://www.yelp.com/developers/documentation/v2/overview"
+       target="_blank">API</a> in
+                                           order to
+    provide
+    data analysis and visualization. We do not passively web crawl or deploy
+    spiders on Yelp, which means ylplines pulls information on demand. What
+    that translates to for the user is that it does take time to get data about
+    the business that's being looked up.
+    </p>
+
+    <p>
+    Ylplines is <a href="https://github.com/jcjl013/ylplines"
+                                target="_blank">open sourced</a> and licensed
+        under the
+                                <a href="https://github
+                                .com/jcjl013/ylplines/blob/master/LICENSE
+                                .txt" target="_blank">GNU
+                                General
+    Public
+    License</a> agreement.
+    </p>
+
+    <p>
+    There are big ideas on how to improve the services ylplines provides that
+    I'm excited to implement.
+    This is a project that I've had a lot of fun working on, and I hope to
+    continue improving on the fidelity and quality of ylplines for more
+    continued programming fun.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>Methodology For Ylplines Ratings</h2>
+
+    <p>
+    Ylplines uses its own ratings algorithm to estimate the quality of a
+    business. Ylplines does display the original Yelp rating as a reference
+    when you're viewing a business, though.
+    </p>
+
+    <p>
+    Our ylpline rating is adjusted to put more weight on more recent reviews,
+    employing the concept of <a href="https://en.wikipedia.org/wiki/Exponential_smoothing" target="_blank">exponential smoothing</a>.
+        As
+    reviews
+                                grow
+                                older,
+        they
+    are weighted less towards the final rating. The decay factor ylplines
+    employs can change often, and currently is still being trained over the
+    course of the next few weeks.
+    </p>
+
+    <p>
+    We take into account every Yelp review for the business, date them,
+    employ Ylplines' rating algorithm, and assess a final, normalized rating
+    for what we think represents the current quality of a business based on
+    Yelp reviews.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>Technologies and Thanks</h2>
+
+    <p>
+    Ylplines's backbone uses the <a href="https://www.djangoproject.com"
+                                    target="_blank">Django</a> framework for
+        quick and clear
+    project organization. This obviously means the backend is written in
+    <a href="https://www.python.org" target="_blank">Python</a> with a
+        <a href="http://postgresql.org" target="_blank">PostgreSQL</a>
+        database, and the frontend makes ample
+        use of
+        <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/About_JavaScript" target="_blank">Javascript</a> and <a href="https://jquery.com"
+                                                 target="_blank">jQuery</a>.</p>
+
+    <p>
+    Ylplines source is stored in its safe space repo on <a href="https://github.com/jcjl013/ylplines"
+                                target="_blank">Github</a>. <a
+            href="https://travis-ci.org/jcjl013/ylplines" target="_blank">Travis
+    CI</a> for continuous integration. <a href="https://coveralls.io/github/jcjl013/ylplines?branch=master" target="_blank">Coveralls</a>
+        for
+        deployment
+        testing
+    . <a href="https://waffle.io/jcjl013/ylplines" target="_blank">Waffle</a>
+            for
+         work-tracking. <a href="https://www.openshift.com"
+                           target="_blank">Openshift</a>
+                           for deployment.
+    </p>
+
+    <p>
+    And special thanks to all the other open source developers out there that
+    share their super useful projects so that we don't all reinvent wheels.
+    </p>
+
+    <br>
+    <br>
+
+    <h2>Contact</h2>
+
+    <p>
+    My name is <a href="http://jeffcjlee.com">Jeff Lee</a> and I like
+        creating
+    things that make the world
+        better
+    and life easier.
+    </p>
+    <p>
+    You can contact me at: <a href="mailto:jeffcjlee@gmail.com">jeffcjlee@gmail.com</a>
+    </p>
+
+
+
+
+</div>

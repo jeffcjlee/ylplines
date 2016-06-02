@@ -13,6 +13,7 @@ body {
 html {
     overflow-y: scroll;
 }
+
 #header {
     width: 100%;
     position: fixed;
@@ -56,17 +57,18 @@ a:hover{
     float: right;
     font-size: 1.2em;
     height: 100%;
-
 }
 
 #banner_menu a {
-    color: #759bb4;
+    color: #3493ff;
 }
 
 #banner_menu a:hover{
     color: #FFFFFF;
 }
 
+#menu_option_about {
+}
 
 #wrapper {
 	min-height: 80vh;
@@ -291,6 +293,7 @@ input[type="text"].form_value{
 .business_wrapper {
     margin: 10px auto;
     display: block;
+    border: 1px white solid;
 
 }
 
@@ -655,6 +658,35 @@ span.sparkline_title {
 .details_graph {
     height: 300px;
 }
+
+.about_wrapper #headline {
+    text-align: center;
+}
+
+.about_wrapper {
+    border: 10px solid rgba(230,230,230,1);
+    min-height: 100px;
+    width: 800px;
+    margin: 0 auto;
+    border-radius: 6px;
+    background-color: rgba(230,230,230,1);
+    color: #000000;
+    padding: 10px;
+}
+
+.about_wrapper a {
+    color: #000000;
+    transition: color 0.3s;
+}
+
+.about_wrapper a:hover{
+    color: #3493ff;
+}
+
+.about_wrapper h2 {
+    color: #3493ff;
+}
+
 /* Business */
 svg > text {
     display: none;

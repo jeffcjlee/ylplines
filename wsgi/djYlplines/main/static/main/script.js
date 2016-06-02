@@ -461,6 +461,33 @@ var process_ylp_retrieval = function(business_wrapper, business_id) {
 };
 
 /**
+ * Ajax display About information for website
+ */
+var display_about = function() {
+    $('#footer').animate({opacity: 0}, 500);
+
+    var processServerResponse = function(server_response_data, status,
+                    jqXHR_ignored) {
+        $('#search_results_container').animate({opacity: 0}, 500, function() {
+            $('#search_results_container').html(server_response_data);
+            $('#search_results_container').css('display', 'block');
+            scroll_to_results(true);
+            $('#search_results_container').animate({opacity: 1}, 500);
+        });
+    };
+    
+    var config = {
+      type: "GET",
+      url: ABOUT_URL,
+      data: {},
+      dataType: 'html',
+      success: processServerResponse
+    };
+    $.ajax(config);
+};
+
+
+/**
  * Ajax process search query
  */
 var process_search = function()  {
@@ -487,7 +514,7 @@ var process_search = function()  {
             $('#search_results_container').animate({opacity: 0}, 500, function() {
                 $('#search_results_container').html(server_response_data);
                 $('#search_results_container').css('display', 'block');
-                scroll_to_results();
+                scroll_to_results(false);
                 $('#search_results_container').animate({opacity: 1}, 500);
                 $('.load_button').click(function() {
                 load_business($(this));
@@ -524,14 +551,16 @@ var process_search = function()  {
 /**
  * Scroll to business results
  */
-var scroll_to_results = function() {
+var scroll_to_results = function(only_scroll) {
     $('html, body').animate({
-        scrollTop: $("#search_results_container").offset().top-60
+        scrollTop: $("#search_results_container").offset().top - 60
     }, 2000, function () {
-        $('#submit_button').html("<img id='submit_button_image' src=" + SEARCH_IMG + " width='20' height='20'/>");
-        clearInterval(interval);
-        currently_handling_search = false;
-        load_results_content();
+        if(!only_scroll) {
+            $('#submit_button').html("<img id='submit_button_image' src=" + SEARCH_IMG + " width='20' height='20'/>");
+            clearInterval(interval);
+            currently_handling_search = false;
+            load_results_content();
+        }
     });
 
     $('#footer').animate({opacity: 1}, 500);
@@ -677,6 +706,9 @@ var slide_shield_loading_out = function(shield_loading, business_wrapper) {
  * Set up event listeners
  */
 var set_up_listeners = function() {
+    $('#menu_option_about').click(_.debounce(display_about,
+        MILLS_TO_IGNORE_SEARCH, true));
+
     $("#id_query").keyup(function(event){
         if(event.keyCode == 13){
             if (submit_ok) {

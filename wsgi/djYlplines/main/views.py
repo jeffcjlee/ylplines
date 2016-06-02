@@ -27,6 +27,7 @@ from main import tasks
 
 MODULE_NAME = 'main.views'
 
+
 def index(request):
     """Renders front page of website"""
     try:
@@ -48,6 +49,16 @@ def index(request):
         return render(request, 'main/index.html', {'form': form})
     except Exception as ex:
         log_exception(MODULE_NAME, inspect.currentframe().f_code.co_name, ex)
+
+
+def display_about(request):
+    """Handles ajax request to display About info"""
+    return render_to_response('main/about_snippet.html')
+
+
+def about(request):
+    """Renders the about page of website"""
+    return render(request, 'main/about.html')
 
 
 def search_with_ajax(request):

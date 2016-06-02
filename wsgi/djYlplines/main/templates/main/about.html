@@ -2,12 +2,13 @@
 {% load staticfiles %}
 {% load widget_tweaks %}
 
-{% block title %}Clarity for Yelp{% endblock %}
+{% block title %}What About It{% endblock %}
 {% block scripts %}
     <link href='https://fonts.googleapis.com/css?family=Roboto:100,300,400,700,900' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Open+Sans:300,400,700,800' rel='stylesheet' type='text/css'>
 
 {% endblock %}
+
 {% block body %}
     <div id="header">
         <div id="banner">
@@ -19,13 +20,12 @@
             </div>
                    </a>
             <div id="banner_menu">
-                <div id="menu_option_about"><a href="#">ABOUT</a></div>
+                <a href="/about/">ABOUT</a>
             </div>
         </div>
     </div>
 
     <div id="wrapper">
-
         <div id="content-wrapper">
             <div id="content">
                 <div id="content_hero">
@@ -56,31 +56,22 @@
                 </div>
             </div>
         </div>
-
-
-
-        <div id="search_results_container">
-            {% include "main/search_results_snippet.html" %}
+    </div>
+    <div id="footer">
+        <div id="footer_content">
+            <span id="footer_content_text">Copyright &copy; 2016 - Jeff Lee</span>
         </div>
-
-
-
-        <div id="footer">
-            <div id="footer_content">
-                <span id="footer_content_text">Copyright &copy; 2016 - Jeff Lee</span>
-            </div>
-            <div id="version">
-                <span id="version_text">Version: 0.2</span>
-            </div>
+        <div id="version">
+            <span id="version_text">Version: 0.1.0</span>
         </div>
     </div>
+
     <script type='text/javascript' src="https://cdnjs.cloudflare.com/ajax/libs/underscore.js/1.7.0/underscore-min.js"></script>
    <script language="javascript">
-      var ABOUT_URL = "{% url 'main:display_about' %}";
       var SEARCH_URL = "{% url 'main:search' %}";
-      var RETRIEVE_YLP_URL = "{% url 'main:retrieve_ylp' %}";
-      var ENQUEUE_FETCH_URL = "{% url 'main:enqueue_fetch' %}";
-      var CHECK_FETCH_STATE_URL = "{% url 'main:check_fetch_state' %}";
+      var RETRIEVE_YLP_URL = "{% url 'main:retrieve_ylp' %}"
+      var ENQUEUE_FETCH_URL = "{% url 'main:enqueue_fetch' %}"
+      var CHECK_FETCH_STATE_URL = "{% url 'main:check_fetch_state' %}"
       var GIF_LOADER_IMG = "{% static "main/images/ajax-loader.gif" %}";
       var SEARCH_IMG = "{% static "main/images/search.svg" %}";
       var HEART_IMG = "{% static "main/images/heart.svg" %}";
@@ -93,6 +84,4 @@
     <script src="http://code.highcharts.com/stock/highstock.js"></script>
     <script src="{% static 'main/highcharts-regression.js' %}"></script>
     <script src="{% static 'main/script.js' %}"></script>
-
-
 {% endblock %}

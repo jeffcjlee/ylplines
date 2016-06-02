@@ -26,4 +26,6 @@ urlpatterns = [
         name="enqueue_fetch"),
     url(r'^check_fetch_state/$', "main.views.check_fetch_state_with_ajax",
         name="check_fetch_state"),
+    url(r'^display_about/$', "main.views.display_about", name='display_about'),
+    url(r'^about/$', views.about, name='about'),
 ]
