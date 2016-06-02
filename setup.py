@@ -40,7 +40,7 @@ setup(
         'celery[redis]',
         'redis',
         'kombu',
-        'amqp>=1.4.9',
+        'amqp<2.0,>=1.4.9',
         'anyjson',
         'billiard',
         'newrelic',
