@@ -46,7 +46,7 @@ DAYS_TO_DELAY_FETCHING = 0
 MAX_WORKERS = 5
 
 #########################################################
-# Search for businesses when given search query
+# Search for businesses when given search query.
 #########################################################
 
 
