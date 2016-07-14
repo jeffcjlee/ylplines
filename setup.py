@@ -37,7 +37,7 @@ setup(
         'coveralls',
         'django-widget-tweaks',
         'Sphinx',
-        'celery[redis]',
+        'celery[redis]<4',
         'redis',
         'kombu',
         'amqp<2.0,>=1.4.9',
