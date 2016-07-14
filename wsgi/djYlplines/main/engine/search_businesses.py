@@ -354,7 +354,7 @@ def get_business_reviews(business, num_reviews=0, task=None, debug=False):
     futures = []
     responses = []
 
-    # Multi-thread requests and HTML parsing
+    # Multi-thread requests and HTML parsings
     for i, url in enumerate(urls):
         future = session.get(url,
                              background_callback=parse_results_in_background)
