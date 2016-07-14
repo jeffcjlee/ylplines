@@ -42,7 +42,7 @@ setup(
         'kombu<4',
         'amqp<2.0,>=1.4.9',
         'anyjson',
-        'billiard',
+        'billiard<3.4',
         'newrelic',
     ],
     dependency_links=[
