@@ -39,7 +39,7 @@ setup(
         'Sphinx',
         'celery[redis]<4',
         'redis',
-        'kombu',
+        'kombu<4',
         'amqp<2.0,>=1.4.9',
         'anyjson',
         'billiard',
