@@ -373,7 +373,7 @@ def get_business_reviews(business, num_reviews=0, task=None, debug=False):
     concurrency_pull_end = default_timer()
     log(MODULE_NAME, FUNC_NAME, '%s | Concurrent pull end. Duration: %s '
                                 'seconds' % (business.id, str(concurrency_pull_end-concurrency_pull_start)))
-    # Save reviews to database.
+    # Save reviews to database. Has debugging code.
     log(MODULE_NAME, FUNC_NAME, '%s | Begin response processing' % business.id)
     print("Processing response (%s total)..." % num_requests, end="", flush=True)
 
