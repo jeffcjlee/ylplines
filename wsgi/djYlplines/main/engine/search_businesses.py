@@ -329,12 +329,12 @@ def get_business_reviews(business, num_reviews=0, task=None, debug=False):
     todays_date = datetime.today().date()
 
     # Don't bother fetching if we fetched recently already.
-    if business.latest_review_pull and business.latest_review_pull + \
-            timedelta(days=DAYS_TO_DELAY_FETCHING) >= todays_date:
-        print("Hitting too recent to fetch")
-        log(MODULE_NAME, FUNC_NAME, '%s | Hitting too recent to fetch' %
-            business.id)
-        return
+    # if business.latest_review_pull and business.latest_review_pull + \
+    #         timedelta(days=DAYS_TO_DELAY_FETCHING) >= todays_date:
+    #     print("Hitting too recent to fetch")
+    #     log(MODULE_NAME, FUNC_NAME, '%s | Hitting too recent to fetch' %
+    #         business.id)
+    #     return
 
     if Review.objects.filter(business_id=business.id).exists():
         latest_review_date = Review.objects.filter(
