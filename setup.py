@@ -36,7 +36,7 @@ setup(
         'coverage>=4.1b2',
         'coveralls',
         'django-widget-tweaks',
-        'Sphinx',
+        'Sphinx==1.4.9',
         'celery[redis]<4',
         'redis',
         'kombu<4',
